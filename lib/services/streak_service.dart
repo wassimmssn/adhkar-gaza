@@ -66,7 +66,10 @@ class StreakService {
   }
 
   /// Calculates current active streak count in days up to today.
-  static int calculateCurrentStreak(Map<String, DayCompletion> data, DateTime now) {
+  static int calculateCurrentStreak(
+    Map<String, DayCompletion> data,
+    DateTime now,
+  ) {
     final todayKey = formatDateKey(now);
     final yesterdayKey = formatDateKey(now.subtract(const Duration(days: 1)));
 
@@ -100,7 +103,10 @@ class StreakService {
   }
 
   /// Calculates all-time best streak
-  static int calculateBestStreak(Map<String, DayCompletion> data, int savedBest) {
+  static int calculateBestStreak(
+    Map<String, DayCompletion> data,
+    int savedBest,
+  ) {
     if (data.isEmpty) return savedBest;
 
     final sortedKeys = data.keys.toList()..sort();
@@ -141,7 +147,7 @@ class StreakService {
   /// Calculates total completed sessions across history
   static int calculateTotalCompletedSessions(Map<String, DayCompletion> data) {
     int total = 0;
-    for (final entry in data.values) {
+    for (var entry in data.values) {
       total += entry.totalCompletedItems;
     }
     return total;
