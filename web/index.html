@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" translate="no">
+
+<head>
+  <base href="/">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+
+  <!-- Cache-Busting for PWA Updates -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
+  <meta name="description" content="Morning & Evening Adhkar app. Sadaqa Jariya for Gaza. Works offline.">
+  <meta name="google" content="notranslate">
+
+  <!-- iOS Meta Tags & Icons (Kept for PWA functionality) -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Adhkar Gaza">
+
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="icons/Icon-152.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="icons/Icon-167.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icons/Icon-180.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png" />
+
+  <title>Adhkar Gaza - أذكار غزة</title>
+  <link rel="manifest" href="manifest.json">
+
+  <script>
+    // ── Web Push Subscription Helpers ──────────────────────────────────────
+    const WORKER_URL = 'https://adhkar-push.wassimbousmaa.workers.dev';
+    let cachedVapidKey = null;
+
+    // Pre-fetch and cache VAPID key on page load to keep subscription synchronous
+    // and preserve the user gesture context.
+    async function prefetchVapidKey() {
+      try {
+        const resp = await fetch(WORKER_URL + '/api/vapid-key');
+        const data = await resp.json();
+        cachedVapidKey = data.publicKey;
+      } catch (e) {
+        console.error('Failed to pre-fetch VAPID key:', e);
+      }
+    }
+    prefetchVapidKey();
+
+    // Convert URL-safe base64 VAPID key to Uint8Array for pushManager.subscribe
+    function urlBase64ToUint8Array(base64String) {
+      const padding = '='.repeat((4 - base64String.length % 4) % 4);
+      const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+      const rawData = window.atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+
+    // Convert ArrayBuffer to URL-safe base64 (base64url, no padding)
+    // Required by Web Push spec — btoa() produces standard base64 which breaks web-push-neo
+    function arrayBufferToBase64Url(buffer) {
+      const bytes = new Uint8Array(buffer);
+      let binary = '';
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    }
+
+    // Fetch the VAPID public key from cache or Worker
+    window.getVapidPublicKey = async function() {
+      if (cachedVapidKey) return cachedVapidKey;
+      try {
+        const resp = await fetch(WORKER_URL + '/api/vapid-key');
+        const data = await resp.json();
+        cachedVapidKey = data.publicKey;
+        return cachedVapidKey;
+      } catch (e) {
+        console.error('Failed to fetch VAPID key:', e);
+        return null;
+      }
+    };
+
+    // Subscribe the browser to Web Push and register with our Worker
+    window.subscribeToPush = async function(preferencesJson) {
+      try {
+        const vapidKey = await window.getVapidPublicKey();
+        if (!vapidKey) throw new Error('No VAPID key');
+
+        const registration = await navigator.serviceWorker.ready;
+        
+        // Check for existing subscription first
+        let subscription = await registration.pushManager.getSubscription();
+        
+        if (!subscription) {
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: urlBase64ToUint8Array(vapidKey),
+          });
+        }
+
+        // Send subscription + preferences to our Worker
+        const preferences = JSON.parse(preferencesJson);
+        const resp = await fetch(WORKER_URL + '/api/subscribe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subscription: {
+              endpoint: subscription.endpoint,
+              keys: {
+                p256dh: arrayBufferToBase64Url(subscription.getKey('p256dh')),
+                auth: arrayBufferToBase64Url(subscription.getKey('auth')),
+              },
+            },
+            preferences: preferences,
+          }),
+        });
+
+        const result = await resp.json();
+        return JSON.stringify({ success: true, endpoint: subscription.endpoint });
+      } catch (e) {
+        console.error('Push subscribe error:', e);
+        return JSON.stringify({ success: false, error: e.message });
+      }
+    };
+
+    // Unsubscribe from Web Push
+    window.unsubscribeFromPush = async function() {
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        if (subscription) {
+          // Tell Worker to remove
+          await fetch(WORKER_URL + '/api/unsubscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endpoint: subscription.endpoint }),
+          });
+          await subscription.unsubscribe();
+        }
+        return 'ok';
+      } catch (e) {
+        console.error('Push unsubscribe error:', e);
+        return 'error';
+      }
+    };
+
+    // Send a test push notification via the Worker
+    window.sendTestPushViaWorker = async function() {
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        if (!subscription) return JSON.stringify({ success: false, error: 'not_subscribed' });
+
+        const resp = await fetch(WORKER_URL + '/api/test-push', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subscription: {
+              endpoint: subscription.endpoint,
+              keys: {
+                p256dh: arrayBufferToBase64Url(subscription.getKey('p256dh')),
+                auth: arrayBufferToBase64Url(subscription.getKey('auth')),
+              },
+            },
+          }),
+        });
+
+        const result = await resp.json();
+        return JSON.stringify(result);
+      } catch (e) {
+        console.error('Test push error:', e);
+        return JSON.stringify({ success: false, error: e.message });
+      }
+    };
+
+    // Check if browser has an active push subscription
+    window.getPushSubscriptionStatus = async function() {
+      try {
+        const registration = await navigator.serviceWorker.ready;
+        const subscription = await registration.pushManager.getSubscription();
+        return subscription ? 'subscribed' : 'not_subscribed';
+      } catch (e) {
+        return 'error';
+      }
+    };
+
+    window.showImmediateNotification = function(title, body, category) {
+      if ('serviceWorker' in navigator && 'Notification' in window && Notification.permission === 'granted') {
+        navigator.serviceWorker.ready.then((registration) => {
+          registration.showNotification(title, {
+            body: body,
+            data: { category: category },
+            icon: '/icons/Icon-192.png',
+            badge: '/icons/Icon-192.png',
+            tag: 'adhkar_immediate_' + new Date().getTime(),
+            requireInteraction: true,
+          });
+        }).catch((err) => {
+          new Notification(title, { body: body });
+        });
+      } else if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, { body: body });
+      }
+    };
+
+    window.requestNotificationPermission = async function() {
+      if (!('Notification' in window)) return 'unsupported';
+      const permission = await Notification.requestPermission();
+      return permission;
+    };
+
+    window.getNotificationPermission = function() {
+      if (!('Notification' in window)) return 'unsupported';
+      return Notification.permission;
+    };
+  </script>
+
+  <script>
+    // The value below is injected by flutter build, do not touch.
+    const serviceWorkerVersion = null;
+  </script>
+  <!-- This script adds the flutter initialization JS code -->
+  <script src="flutter.js" defer></script>
+</head>
+
+<body>
+  <script>
+    window.addEventListener('load', function (ev) {
+      if ('serviceWorker' in navigator) {
+        // Manually register our generated custom Service Worker with a strong cache buster
+        const swUrl = 'flutter_service_worker.js?v=' + new Date().getTime();
+        navigator.serviceWorker.register(swUrl).then((registration) => {
+          console.log('Service Worker registered with scope:', registration.scope);
+        }).catch((error) => {
+          console.error('Service Worker registration failed:', error);
+        });
+
+        // Unregister any old offline_worker.js instances
+        navigator.serviceWorker.getRegistrations().then(function (registrations) {
+          for (let registration of registrations) {
+            if (registration.active && registration.active.scriptURL.includes('offline_worker.js')) {
+              registration.unregister();
+              console.log('Unregistered offline_worker.js');
+            }
+          }
+        });
+      }
+
+      // Load Flutter Entrypoint
+      _flutter.loader.loadEntrypoint({
+        onEntrypointLoaded: function (engineInitializer) {
+          engineInitializer.initializeEngine({
+            renderer: "html",
+            useColorEmoji: true
+          }).then(function (appRunner) {
+            appRunner.runApp();
+          });
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "adhkar-push",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "web-push-neo": "^0.1.0",
+    "adhan": "^4.4.3"
+  }
+}
