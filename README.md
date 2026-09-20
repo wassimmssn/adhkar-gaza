@@ -126,6 +126,6 @@ Feel free to use, distribute, and contribute to this repository. May Allah accep
 
 ## 👤 Author
 
-**Wassim Bousmaa**
+**Wassim Moussouni**
 - GitHub: [@wassimsn](https://github.com/wassimsn)
 - Live Web App: [adhkar-gaza.pages.dev](https://adhkar-gaza.pages.dev)
