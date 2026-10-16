@@ -14,7 +14,7 @@ echo Copying _headers...
 copy web\_headers build\web\_headers
 echo.
 echo Deploying to Cloudflare Pages (Production)...
-call npx.cmd -y wrangler pages deploy build/web --branch main --commit-dirty=true
+call npx.cmd -y wrangler pages deploy build/web --project-name=adhkar-gaza --branch main --commit-dirty=true
 echo.
 echo ============================================
 echo   SUCCESS: Build and Deploy complete!
