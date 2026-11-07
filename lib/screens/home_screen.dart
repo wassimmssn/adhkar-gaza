@@ -182,7 +182,7 @@ class _HomeScreenState extends State<HomeScreen>
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
-      appBar: GlassAppBar(title: 'أذكار غزة', scrollOffset: _scrollOffset),
+      appBar: GlassAppBar(title: AppStrings.get('app_title', lang), scrollOffset: _scrollOffset),
       bottomNavigationBar: const FloatingGlassDock(activeIndex: 0),
       body: Stack(
         children: [
@@ -289,11 +289,7 @@ class _HomeScreenState extends State<HomeScreen>
                                   textAlign: TextAlign.center,
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                '🇵🇸',
-                                style: TextStyle(fontSize: 16),
-                              ),
+
                             ],
                           ),
                         ),
@@ -322,7 +318,7 @@ class _HomeScreenState extends State<HomeScreen>
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'اختر الأذكار',
+                              AppStrings.get('choose_adhkar', lang),
                               style: theme.textTheme.headlineMedium?.copyWith(
                                 fontWeight: FontWeight.w800,
                               ),
@@ -491,7 +487,7 @@ class _HomeScreenState extends State<HomeScreen>
                         },
                         child: _CategoryCard(
                           title: AppStrings.get('morning_title', lang),
-                          subtitle: 'ابدأ يومك بذكر الله',
+                          subtitle: AppStrings.get('morning_subtitle', lang),
                           icon: Icons.wb_sunny_rounded,
                           gradientColors: const [
                             Color(0xFFFCD34D),
@@ -515,7 +511,7 @@ class _HomeScreenState extends State<HomeScreen>
                         },
                         child: _CategoryCard(
                           title: AppStrings.get('evening_title', lang),
-                          subtitle: 'أمسِ على ذكر الله',
+                          subtitle: AppStrings.get('evening_subtitle', lang),
                           icon: Icons.nightlight_round,
                           gradientColors: const [
                             Color(0xFF818CF8),
@@ -539,7 +535,7 @@ class _HomeScreenState extends State<HomeScreen>
                         },
                         child: _CategoryCard(
                           title: AppStrings.get('prayer_title', lang),
-                          subtitle: 'الأذكار بعد السلام من الصلاة المفروضة',
+                          subtitle: AppStrings.get('prayer_subtitle', lang),
                           icon: Icons.mosque_rounded,
                           gradientColors: const [
                             Color(0xFF38BDF8),
@@ -571,10 +567,13 @@ class _HomeScreenState extends State<HomeScreen>
 
   void _navigateToAdhkar(BuildContext context, String category) {
     final provider = Provider.of<AdhkarProvider>(context, listen: false);
+    final lang = Provider.of<SettingsProvider>(context, listen: false).language;
     provider.loadAdhkar(category);
     final String title = category == 'morning'
-        ? 'أذكار الصباح'
-        : (category == 'evening' ? 'أذكار المساء' : 'أذكار بعد الصلاة');
+        ? AppStrings.get('morning_title', lang)
+        : (category == 'evening'
+            ? AppStrings.get('evening_title', lang)
+            : AppStrings.get('prayer_title', lang));
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => AdhkarScreen(title: title)),

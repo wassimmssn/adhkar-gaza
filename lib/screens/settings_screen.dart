@@ -217,7 +217,7 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 28),
           _SectionHeader(
             icon: Icons.notifications_active_outlined,
-            title: 'التبليغات والذكر',
+            title: AppStrings.get('notifications', lang),
             theme: theme,
           ),
           const SizedBox(height: 12),
@@ -253,14 +253,14 @@ class SettingsScreen extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'تفعيل التنبيهات اليومية',
+                                AppStrings.get('notif_daily', lang),
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                               const SizedBox(height: 2),
                               Text(
-                                hasPermission ? 'التنبيهات مفعلة وستصلك في أوقاتها' : 'احصل على تذكير لقراءة الأذكار اليومية',
+                                hasPermission ? AppStrings.get('notif_active_desc', lang) : AppStrings.get('notif_inactive_desc', lang),
                                 style: theme.textTheme.bodySmall,
                               ),
                             ],
@@ -283,8 +283,8 @@ class SettingsScreen extends StatelessWidget {
                               ),
                               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                             ),
-                            child: const Text(
-                              'تفعيل',
+                            child: Text(
+                              AppStrings.get('activate', lang),
                               style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.bold, fontSize: 13),
                             ),
                           )
@@ -827,76 +827,78 @@ class _SlidingLanguageSelector extends StatelessWidget {
                 : theme.colorScheme.primary.withValues(alpha: 0.04),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Stack(
-            children: [
-              // Animated pill slider
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 250),
-                curve: Curves.easeInOutCubic,
-                left: isArabic ? 0 : halfWidth,
-                top: 3,
-                bottom: 3,
-                width: halfWidth,
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(13),
-                    boxShadow: [
-                      BoxShadow(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Stack(
+              children: [
+                // Animated pill slider (LTR: 0 = Arabic, 1 = French)
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeInOutCubic,
+                  left: isArabic ? 4 : halfWidth + 2,
+                  top: 4,
+                  bottom: 4,
+                  width: halfWidth - 6,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary,
+                      borderRadius: BorderRadius.circular(13),
+                      boxShadow: [
+                        BoxShadow(
+                          color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              // Labels row
-              Row(
-                children: [
-                  Expanded(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () => onChanged('ar'),
-                      child: Center(
-                        child: Text(
-                          'العربية',
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: isArabic
-                                ? Colors.white
-                                : (isDark ? Colors.white70 : theme.colorScheme.onSurface),
+                // Labels row in fixed LTR order
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () => onChanged('ar'),
+                        child: Center(
+                          child: Text(
+                            'العربية',
+                            style: TextStyle(
+                              fontFamily: 'Cairo',
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: isArabic
+                                  ? Colors.white
+                                  : (isDark ? Colors.white70 : theme.colorScheme.onSurface),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () => onChanged('fr'),
-                      child: Center(
-                        child: Text(
-                          'Français',
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: !isArabic
-                                ? Colors.white
-                                : (isDark ? Colors.white70 : theme.colorScheme.onSurface),
+                    Expanded(
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () => onChanged('fr'),
+                        child: Center(
+                          child: Text(
+                            'Français',
+                            style: TextStyle(
+                              fontFamily: 'Cairo',
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: !isArabic
+                                  ? Colors.white
+                                  : (isDark ? Colors.white70 : theme.colorScheme.onSurface),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },
