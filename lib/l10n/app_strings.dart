@@ -203,6 +203,183 @@ class AppStrings {
       'ar': 'تفعيل',
       'fr': 'Activer',
     },
+    // ── Notifications Details ──
+    'test_notification': {
+      'ar': 'تجربة التنبيه',
+      'fr': 'Tester le rappel',
+    },
+    'notif_test_success': {
+      'ar': 'تم إرسال التنبيه التجريبي بنجاح ✅',
+      'fr': 'Rappel test envoyé avec succès ✅',
+    },
+    'notif_test_fail': {
+      'ar': 'فشل إرسال التنبيه: {error}',
+      'fr': 'Échec de l’envoi du rappel : {error}',
+    },
+    'morning_reminder': {
+      'ar': 'تنبيه أذكار الصباح',
+      'fr': 'Rappel Adhkar du Matin',
+    },
+    'morning_reminder_desc': {
+      'ar': 'تذكير لقراءة أذكار الصباح بعد الفجر',
+      'fr': 'Rappel pour lire les invocations du matin après le Fajr',
+    },
+    'fajr_reminder_time': {
+      'ar': 'وقت التذكير (بعد الفجر):',
+      'fr': 'Heure du rappel (après le Fajr) :',
+    },
+    'at_fajr': {
+      'ar': 'في وقت الفجر',
+      'fr': 'À l’heure du Fajr',
+    },
+    'after_fajr_15': {
+      'ar': 'بعد الفجر بـ 15 دقيقة',
+      'fr': '15 min après le Fajr',
+    },
+    'after_fajr_30': {
+      'ar': 'بعد الفجر بـ 30 دقيقة',
+      'fr': '30 min après le Fajr',
+    },
+    'evening_reminder': {
+      'ar': 'تنبيه أذكار المساء',
+      'fr': 'Rappel Adhkar du Soir',
+    },
+    'evening_reminder_desc': {
+      'ar': 'تذكير لقراءة أذكار المساء بعد العصر أو قرب المغرب',
+      'fr': 'Rappel pour les invocations du soir après l’Asr ou avant le Maghreb',
+    },
+    'evening_reminder_time': {
+      'ar': 'وقت التذكير:',
+      'fr': 'Heure du rappel :',
+    },
+    'at_asr': {
+      'ar': 'في وقت العصر',
+      'fr': 'À l’heure de l’Asr',
+    },
+    'after_asr_15': {
+      'ar': 'بعد العصر بـ 15 دقيقة',
+      'fr': '15 min après l’Asr',
+    },
+    'after_asr_30': {
+      'ar': 'بعد العصر بـ 30 دقيقة',
+      'fr': '30 min après l’Asr',
+    },
+    'before_maghrib_30': {
+      'ar': 'قبل المغرب بـ 30 دقيقة',
+      'fr': '30 min avant le Maghreb',
+    },
+    'after_maghrib_15': {
+      'ar': 'بعد المغرب بـ 15 دقيقة',
+      'fr': '15 min après le Maghreb',
+    },
+    'location_title': {
+      'ar': 'موقع الحساب والصلوات',
+      'fr': 'Localisation & Horaires de prière',
+    },
+    'current_city': {
+      'ar': 'المدينة الحالية: {city}',
+      'fr': 'Ville actuelle : {city}',
+    },
+    'detect_location': {
+      'ar': 'تحديث الموقع تلقائياً',
+      'fr': 'Actualiser la localisation',
+    },
+    'syncing': {
+      'ar': 'جاري مزامنة الإعدادات...',
+      'fr': 'Synchronisation des réglages...',
+    },
+    'notif_active_bg': {
+      'ar': 'التنبيهات مفعلة ✅ ستصلك حتى لو كان المتصفح مغلقاً.',
+      'fr': 'Rappels actifs ✅ Vous les recevrez même avec le navigateur fermé.',
+    },
+    'sync_error': {
+      'ar': 'خطأ في المزامنة: {error}',
+      'fr': 'Erreur de synchronisation : {error}',
+    },
+
+    // ── Prayer Selection Screen ──
+    'choose_prayer': {
+      'ar': 'اختر الصلاة',
+      'fr': 'Choisir la prière',
+    },
+    'choose_prayer_desc': {
+      'ar': 'اختر الصلاة التي صليتها',
+      'fr': 'Sélectionnez la prière que vous venez d’accomplir',
+    },
+    'adhkar_after_prayer_title': {
+      'ar': 'أذكار بعد {prayer}',
+      'fr': 'Adhkar après {prayer}',
+    },
+    'prayer_fajr_name': {
+      'ar': 'صلاة الفجر',
+      'fr': 'Prière du Fajr',
+    },
+    'prayer_fajr_sub': {
+      'ar': 'نور الشروق وبداية اليوم',
+      'fr': 'Lumière de l’aube et début de la journée',
+    },
+    'prayer_dhuhr_name': {
+      'ar': 'صلاة الظهر',
+      'fr': 'Prière du Dhuhr',
+    },
+    'prayer_dhuhr_sub': {
+      'ar': 'وسط النهار وذروة الشمس',
+      'fr': 'Milieu du jour au zénith du soleil',
+    },
+    'prayer_asr_name': {
+      'ar': 'صلاة العصر',
+      'fr': 'Prière de l’Asr',
+    },
+    'prayer_asr_sub': {
+      'ar': 'ميل الشمس وآخر النهار',
+      'fr': 'Déclin du soleil et fin d’après-midi',
+    },
+    'prayer_maghrib_name': {
+      'ar': 'صلاة المغرب',
+      'fr': 'Prière du Maghrib',
+    },
+    'prayer_maghrib_sub': {
+      'ar': 'لحظة غروب الشمس',
+      'fr': 'Moment du coucher du soleil',
+    },
+    'prayer_isha_name': {
+      'ar': 'صلاة العشاء',
+      'fr': 'Prière de l’Isha',
+    },
+    'prayer_isha_sub': {
+      'ar': 'سكون الليل وختام اليوم',
+      'fr': 'Calme de la nuit et clôture du jour',
+    },
+
+    // ── Install Dialog & Banners ──
+    'install_app_title': {
+      'ar': 'تثبيت التطبيق',
+      'fr': 'Installer l’application',
+    },
+    'install_ios_desc': {
+      'ar': 'للتثبيت على جهازك (iPhone/iPad):\n\n١. اضغط على أيقونة المشاركة (↥) في المتصفح\n٢. اختر "إضافة إلى الشاشة الرئيسية"\n٣. اضغط "إضافة"',
+      'fr': 'Pour installer sur iPhone/iPad :\n\n1. Appuyez sur le bouton Partager (↥) dans Safari\n2. Choisissez "Sur l’écran d’accueil"\n3. Appuyez sur "Ajouter"',
+    },
+    'install_manual_desc': {
+      'ar': 'للتثبيت يدوياً:\n\nابحث عن أيقونة التثبيت 🖥️ في شريط عنوان المتصفح (URL) أو في قائمة الخيارات (⋮) واختر "تثبيت التطبيق".',
+      'fr': 'Pour installer manuellement :\n\nCliquez sur l’icône d’installation 🖥️ dans la barre d’adresse de votre navigateur ou dans le menu (⋮) puis choisissez "Installer".',
+    },
+    'ok': {
+      'ar': 'حسناً',
+      'fr': 'Compris',
+    },
+    'install_banner_title': {
+      'ar': 'أضف التطبيق للشاشة الرئيسية',
+      'fr': 'Ajoutez l’app à votre écran d’accueil',
+    },
+    'install_banner_subtitle': {
+      'ar': 'للوصول السريع وبدون إنترنت',
+      'fr': 'Accès rapide et fonctionnement 100 % hors-ligne',
+    },
+    'dismiss': {
+      'ar': 'إخفاء',
+      'fr': 'Fermer',
+    },
     'version': {
       'ar': 'أذكار غزة — الإصدار 1.0',
       'fr': 'Adhkar Gaza — Version 1.0',

@@ -94,6 +94,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final lang = Provider.of<SettingsProvider>(context).language;
     final pwaService = Provider.of<PwaInstallService>(context);
 
     // Staggered Animations
@@ -176,8 +177,6 @@ class _HomeScreenState extends State<HomeScreen>
     );
 
     final isDark = theme.brightness == Brightness.dark;
-    final settingsProvider = Provider.of<SettingsProvider>(context);
-    final lang = settingsProvider.language;
 
     return Scaffold(
       extendBody: true,
@@ -595,24 +594,20 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   void _showManualInstallDialog(BuildContext context, {required bool isIos}) {
+    final lang = Provider.of<SettingsProvider>(context, listen: false).language;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('تثبيت التطبيق'),
+        title: Text(AppStrings.get('install_app_title', lang)),
         content: Text(
           isIos
-              ? 'للتثبيت على جهازك (iPhone/iPad):\n\n'
-                    '١. اضغط على أيقونة المشاركة (↥) في المتصفح\n'
-                    '٢. اختر "إضافة إلى الشاشة الرئيسية"\n'
-                    '٣. اضغط "إضافة"'
-              : 'لم نتمكن من إظهار نافذة التثبيت التلقائية.\n\n'
-                    'للتثبيت يدوياً:\n'
-                    'ابحث عن أيقونة التثبيت 🖥️ أو (Install App) في شريط عنوان المتصفح (URL) أو في قائمة الخيارات (⋮).',
+              ? AppStrings.get('install_ios_desc', lang)
+              : AppStrings.get('install_manual_desc', lang),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('حسناً'),
+            child: Text(AppStrings.get('ok', lang)),
           ),
         ],
       ),
@@ -845,6 +840,7 @@ class _InstallRibbonState extends State<_InstallRibbon>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final lang = Provider.of<SettingsProvider>(context).language;
     final isDark = theme.brightness == Brightness.dark;
 
     return AnimatedBuilder(
@@ -905,7 +901,7 @@ class _InstallRibbonState extends State<_InstallRibbon>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'أضف التطبيق للشاشة الرئيسية',
+                          AppStrings.get('install_banner_title', lang),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: theme.colorScheme.primary,
@@ -913,7 +909,7 @@ class _InstallRibbonState extends State<_InstallRibbon>
                           ),
                         ),
                         Text(
-                          'للوصول السريع وبدون إنترنت',
+                          AppStrings.get('install_banner_subtitle', lang),
                           style: TextStyle(
                             fontSize: 12,
                             color: theme.colorScheme.secondary,
@@ -927,7 +923,7 @@ class _InstallRibbonState extends State<_InstallRibbon>
                     icon: const Icon(Icons.close_rounded, size: 20),
                     onPressed: widget.onDismiss,
                     color: theme.colorScheme.onSurfaceVariant,
-                    tooltip: 'إخفاء',
+                    tooltip: AppStrings.get('dismiss', lang),
                   ),
                 ],
               ),
@@ -1234,9 +1230,9 @@ class _StreakSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final lang = Provider.of<SettingsProvider>(context).language;
     final isDark = theme.brightness == Brightness.dark;
     final primaryColor = theme.colorScheme.primary;
-    final lang = Provider.of<SettingsProvider>(context).language;
 
     return Consumer<StreakProvider>(
       builder: (context, streakProvider, _) {

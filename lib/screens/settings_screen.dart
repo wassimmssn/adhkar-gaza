@@ -65,6 +65,7 @@ class SettingsScreen extends StatelessWidget {
                   onChanged: (mode) => themeProvider.setThemeMode(mode),
                   theme: theme,
                   isDark: isDark,
+                  lang: lang,
                 ),
               ],
             ),
@@ -298,8 +299,8 @@ class SettingsScreen extends StatelessWidget {
                                   SnackBar(
                                     content: Text(
                                       success
-                                          ? 'تم إرسال التنبيه التجريبي بنجاح ✅'
-                                          : 'فشل إرسال التنبيه${errorDetail != null ? ': $errorDetail' : '. تأكد من تفعيل أحد التذكيرات أولاً.'}',
+                                          ? AppStrings.get('notif_test_success', lang)
+                                          : AppStrings.get('notif_test_fail', lang, {'error': errorDetail ?? ''}),
                                       textDirection: TextDirection.rtl,
                                       style: const TextStyle(fontFamily: 'Cairo'),
                                     ),
@@ -310,7 +311,7 @@ class SettingsScreen extends StatelessWidget {
                             },
                             icon: Icon(Icons.play_arrow_rounded, size: 16, color: theme.colorScheme.primary),
                             label: Text(
-                              'تجربة التنبيه',
+                              AppStrings.get('test_notification', lang),
                               style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontWeight: FontWeight.bold,
@@ -338,14 +339,14 @@ class SettingsScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'تنبيه أذكار الصباح',
+                                  AppStrings.get('morning_reminder', lang),
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  'تذكير لقراءة أذكار الصباح بعد الفجر',
+                                  AppStrings.get('morning_reminder_desc', lang),
                                   style: theme.textTheme.bodySmall,
                                 ),
                               ],
@@ -364,7 +365,7 @@ class SettingsScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'وقت التذكير (بعد الفجر):',
+                              AppStrings.get('fajr_reminder_time', lang),
                               style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
                             ),
                             DropdownButton<int>(
@@ -372,10 +373,10 @@ class SettingsScreen extends StatelessWidget {
                               dropdownColor: theme.colorScheme.surface,
                               style: theme.textTheme.bodyMedium?.copyWith(fontFamily: 'Cairo', fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
                               underline: const SizedBox(),
-                              items: const [
-                                DropdownMenuItem(value: 0, child: Text('في وقت الفجر')),
-                                DropdownMenuItem(value: 15, child: Text('بعد الفجر بـ 15 دقيقة')),
-                                DropdownMenuItem(value: 30, child: Text('بعد الفجر بـ 30 دقيقة')),
+                              items: [
+                                DropdownMenuItem(value: 0, child: Text(AppStrings.get('at_fajr', lang))),
+                                DropdownMenuItem(value: 15, child: Text(AppStrings.get('after_fajr_15', lang))),
+                                DropdownMenuItem(value: 30, child: Text(AppStrings.get('after_fajr_30', lang))),
                               ],
                               onChanged: (val) {
                                 if (val != null) notifService.setMorningOffset(val);
@@ -397,14 +398,14 @@ class SettingsScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'تنبيه أذكار المساء',
+                                  AppStrings.get('evening_reminder', lang),
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  'تذكير لقراءة أذكار المساء بعد العصر أو قرب المغرب',
+                                  AppStrings.get('evening_reminder_desc', lang),
                                   style: theme.textTheme.bodySmall,
                                 ),
                               ],
@@ -423,7 +424,7 @@ class SettingsScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'وقت التذكير:',
+                              AppStrings.get('evening_reminder_time', lang),
                               style: theme.textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
                             ),
                             DropdownButton<String>(
@@ -431,12 +432,12 @@ class SettingsScreen extends StatelessWidget {
                               dropdownColor: theme.colorScheme.surface,
                               style: theme.textTheme.bodyMedium?.copyWith(fontFamily: 'Cairo', fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
                               underline: const SizedBox(),
-                              items: const [
-                                DropdownMenuItem(value: 'asr_0', child: Text('في وقت العصر')),
-                                DropdownMenuItem(value: 'asr_15', child: Text('بعد العصر بـ 15 دقيقة')),
-                                DropdownMenuItem(value: 'asr_30', child: Text('بعد العصر بـ 30 دقيقة')),
-                                DropdownMenuItem(value: 'maghrib_before_30', child: Text('قبل المغرب بـ 30 دقيقة')),
-                                DropdownMenuItem(value: 'maghrib_after_15', child: Text('بعد المغرب بـ 15 دقيقة')),
+                              items: [
+                                DropdownMenuItem(value: 'asr_0', child: Text(AppStrings.get('at_asr', lang))),
+                                DropdownMenuItem(value: 'asr_15', child: Text(AppStrings.get('after_asr_15', lang))),
+                                DropdownMenuItem(value: 'asr_30', child: Text(AppStrings.get('after_asr_30', lang))),
+                                DropdownMenuItem(value: 'maghrib_before_30', child: Text(AppStrings.get('before_maghrib_30', lang))),
+                                DropdownMenuItem(value: 'maghrib_after_15', child: Text(AppStrings.get('after_maghrib_15', lang))),
                               ],
                               onChanged: (val) {
                                 if (val != null) notifService.setEveningType(val);
@@ -458,14 +459,14 @@ class SettingsScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'موقع الحساب والصلوات',
+                                  AppStrings.get('location_title', lang),
                                   style: theme.textTheme.bodyMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
-                                  'المدينة الحالية: ${notifService.city}',
+                                  AppStrings.get('current_city', lang, {'city': notifService.city}),
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: theme.colorScheme.primary,
                                     fontWeight: FontWeight.bold,
@@ -483,7 +484,7 @@ class SettingsScreen extends StatelessWidget {
                           else
                             IconButton(
                               icon: Icon(Icons.my_location_rounded, color: theme.colorScheme.primary),
-                              tooltip: 'تحديث الموقع تلقائياً',
+                              tooltip: AppStrings.get('detect_location', lang),
                               onPressed: () => notifService.detectIpLocation(),
                             ),
                         ],
@@ -498,7 +499,7 @@ class SettingsScreen extends StatelessWidget {
                             const SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
                             const SizedBox(width: 8),
                             Text(
-                              'جاري مزامنة الإعدادات...',
+                              AppStrings.get('syncing', lang),
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.primary,
                                 fontWeight: FontWeight.w600,
@@ -524,7 +525,7 @@ class SettingsScreen extends StatelessWidget {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  'التنبيهات مفعلة ✅ ستصلك حتى لو كان المتصفح مغلقاً.',
+                                  AppStrings.get('notif_active_bg', lang),
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: theme.colorScheme.primary,
                                     fontWeight: FontWeight.w600,
@@ -551,7 +552,7 @@ class SettingsScreen extends StatelessWidget {
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  'خطأ في المزامنة: ${notifService.lastSyncError}',
+                                  AppStrings.get('sync_error', lang, {'error': notifService.lastSyncError ?? ''}),
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: Colors.red,
                                     fontWeight: FontWeight.w600,
@@ -576,7 +577,7 @@ class SettingsScreen extends StatelessWidget {
           // ── Version footer ──
           Center(
             child: Text(
-              'أذكار غزة — الإصدار 1.0',
+              AppStrings.get('version', lang),
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
               ),
@@ -677,12 +678,14 @@ class _SlidingThemeSelector extends StatelessWidget {
   final ValueChanged<ThemeMode> onChanged;
   final ThemeData theme;
   final bool isDark;
+  final String lang;
 
   const _SlidingThemeSelector({
     required this.currentMode,
     required this.onChanged,
     required this.theme,
     required this.isDark,
+    required this.lang,
   });
 
   static const _modes = [ThemeMode.system, ThemeMode.light, ThemeMode.dark];
@@ -745,9 +748,9 @@ class _SlidingThemeSelector extends StatelessWidget {
                 // ── Tap targets ──
                 Row(
                   children: [
-                    _buildSegment(0, Icons.brightness_auto_outlined, 'النظام', segmentWidth),
-                    _buildSegment(1, Icons.wb_sunny_outlined, 'فاتح', segmentWidth),
-                    _buildSegment(2, Icons.nightlight_outlined, 'داكن', segmentWidth),
+                    _buildSegment(0, Icons.brightness_auto_outlined, AppStrings.get('theme_system', lang), segmentWidth),
+                    _buildSegment(1, Icons.wb_sunny_outlined, AppStrings.get('theme_light', lang), segmentWidth),
+                    _buildSegment(2, Icons.nightlight_outlined, AppStrings.get('theme_dark', lang), segmentWidth),
                   ],
                 ),
               ],

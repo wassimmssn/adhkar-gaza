@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../providers/adhkar_provider.dart';
 import '../widgets/glass_widgets.dart';
+import '../providers/settings_provider.dart';
+import '../l10n/app_strings.dart';
 import 'adhkar_screen.dart';
 
 /// Data model for a prayer card
@@ -24,6 +26,9 @@ class _PrayerInfo {
     required this.glowColor,
     required this.iconBgColor,
   });
+
+  String getName(String lang) => AppStrings.get('prayer_${id}_name', lang);
+  String getSubtitle(String lang) => AppStrings.get('prayer_${id}_sub', lang);
 }
 
 class PrayerSelectionScreen extends StatefulWidget {
@@ -121,11 +126,13 @@ class _PrayerSelectionScreenState extends State<PrayerSelectionScreen>
     final provider = Provider.of<AdhkarProvider>(context, listen: false);
     provider.loadAdhkar('after_${prayer.id}');
 
+    final lang = Provider.of<SettingsProvider>(context, listen: false).language;
+    final prayerName = prayer.getName(lang);
     Navigator.push(
       context,
       PageRouteBuilder(
         pageBuilder: (_, _, _) =>
-            AdhkarScreen(title: 'أذكار بعد ${prayer.name}'),
+            AdhkarScreen(title: AppStrings.get('adhkar_after_prayer_title', lang, {'prayer': prayerName})),
         transitionsBuilder: (_, animation, _, child) {
           return FadeTransition(
             opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
@@ -152,6 +159,7 @@ class _PrayerSelectionScreenState extends State<PrayerSelectionScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final lang = Provider.of<SettingsProvider>(context).language;
 
     // Header animations
     final headerFade = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -172,7 +180,7 @@ class _PrayerSelectionScreenState extends State<PrayerSelectionScreen>
       extendBody: true,
       extendBodyBehindAppBar: true,
       appBar: GlassAppBar(
-        title: 'اختر الصلاة',
+        title: AppStrings.get('choose_prayer', lang),
         scrollOffset: _scrollOffset,
       ),
       bottomNavigationBar: const FloatingGlassDock(activeIndex: 0),
@@ -219,7 +227,7 @@ class _PrayerSelectionScreenState extends State<PrayerSelectionScreen>
                     ),
                     const SizedBox(height: 10),
                     Text(
-                      'أذكار بعد الصلاة',
+                      AppStrings.get('prayer_title', lang),
                       style: Theme.of(context).textTheme.headlineMedium
                           ?.copyWith(
                             fontWeight: FontWeight.w800,
@@ -229,7 +237,7 @@ class _PrayerSelectionScreenState extends State<PrayerSelectionScreen>
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      'اختر الصلاة التي صليتها',
+                      AppStrings.get('choose_prayer_desc', lang),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: isDark
                             ? const Color(0xFF94A3B8)
@@ -280,6 +288,7 @@ class _PrayerSelectionScreenState extends State<PrayerSelectionScreen>
                   child: _PrayerCard(
                     prayer: prayer,
                     isDark: isDark,
+                    lang: lang,
                     onTap: () => _onPrayerTap(context, prayer),
                   ),
                 ),
@@ -301,11 +310,13 @@ class _PrayerSelectionScreenState extends State<PrayerSelectionScreen>
 class _PrayerCard extends StatefulWidget {
   final _PrayerInfo prayer;
   final bool isDark;
+  final String lang;
   final VoidCallback onTap;
 
   const _PrayerCard({
     required this.prayer,
     required this.isDark,
+    required this.lang,
     required this.onTap,
   });
 
@@ -445,7 +456,7 @@ class _PrayerCardState extends State<_PrayerCard>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              prayer.name,
+                              widget.prayer.getName(widget.lang),
                               style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 19,
@@ -458,7 +469,7 @@ class _PrayerCardState extends State<_PrayerCard>
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              prayer.subtitle,
+                              widget.prayer.getSubtitle(widget.lang),
                               style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontSize: 13,
