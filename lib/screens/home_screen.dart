@@ -9,6 +9,7 @@ import 'prayer_selection_screen.dart';
 import 'streak_dashboard_screen.dart';
 import '../widgets/glass_widgets.dart';
 import 'package:web/web.dart' as web;
+import '../l10n/app_strings.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -175,6 +176,8 @@ class _HomeScreenState extends State<HomeScreen>
     );
 
     final isDark = theme.brightness == Brightness.dark;
+    final settingsProvider = Provider.of<SettingsProvider>(context);
+    final lang = settingsProvider.language;
 
     return Scaffold(
       extendBody: true,
@@ -276,7 +279,7 @@ class _HomeScreenState extends State<HomeScreen>
                               const SizedBox(width: 8),
                               Flexible(
                                 child: Text(
-                                  'صدقة جارية لأهلنا في غزة — نسألكم الدعاء',
+                                  AppStrings.get('gaza_banner', lang),
                                   style: theme.textTheme.bodySmall?.copyWith(
                                     color: isDark
                                         ? Colors.white
@@ -439,7 +442,7 @@ class _HomeScreenState extends State<HomeScreen>
                                       ),
                                       const SizedBox(width: 12),
                                       Text(
-                                        'النسخة السريعة (دقيقتان)',
+                                        AppStrings.get('quick_mode', lang),
                                         style: theme.textTheme.bodyMedium
                                             ?.copyWith(
                                               fontWeight: FontWeight.w600,
@@ -487,7 +490,7 @@ class _HomeScreenState extends State<HomeScreen>
                           );
                         },
                         child: _CategoryCard(
-                          title: 'أذكار الصباح',
+                          title: AppStrings.get('morning_title', lang),
                           subtitle: 'ابدأ يومك بذكر الله',
                           icon: Icons.wb_sunny_rounded,
                           gradientColors: const [
@@ -511,7 +514,7 @@ class _HomeScreenState extends State<HomeScreen>
                           );
                         },
                         child: _CategoryCard(
-                          title: 'أذكار المساء',
+                          title: AppStrings.get('evening_title', lang),
                           subtitle: 'أمسِ على ذكر الله',
                           icon: Icons.nightlight_round,
                           gradientColors: const [
@@ -535,7 +538,7 @@ class _HomeScreenState extends State<HomeScreen>
                           );
                         },
                         child: _CategoryCard(
-                          title: 'أذكار بعد الصلاة',
+                          title: AppStrings.get('prayer_title', lang),
                           subtitle: 'الأذكار بعد السلام من الصلاة المفروضة',
                           icon: Icons.mosque_rounded,
                           gradientColors: const [
@@ -1234,6 +1237,7 @@ class _StreakSummaryCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final primaryColor = theme.colorScheme.primary;
+    final lang = Provider.of<SettingsProvider>(context).language;
 
     return Consumer<StreakProvider>(
       builder: (context, streakProvider, _) {
@@ -1278,8 +1282,8 @@ class _StreakSummaryCard extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
-                            'سجل الالتزام اليومي',
+                          Text(
+                            AppStrings.get('streak_title', lang),
                             style: TextStyle(
                               fontFamily: 'Cairo',
                               fontSize: 14.5,
@@ -1322,7 +1326,7 @@ class _StreakSummaryCard extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'التفاصيل',
+                            AppStrings.get('streak_details', lang),
                             style: TextStyle(
                               fontFamily: 'Cairo',
                               fontSize: 12,
@@ -1348,7 +1352,7 @@ class _StreakSummaryCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: _MiniStatusPill(
-                      label: 'الصباح',
+                      label: AppStrings.get('badge_morning', lang),
                       isDone: today.morning,
                       isDark: isDark,
                     ),
@@ -1356,7 +1360,7 @@ class _StreakSummaryCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: _MiniStatusPill(
-                      label: 'المساء',
+                      label: AppStrings.get('badge_evening', lang),
                       isDone: today.evening,
                       isDark: isDark,
                     ),
@@ -1364,7 +1368,7 @@ class _StreakSummaryCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: _MiniStatusPill(
-                      label: 'الصلوات (${today.prayers.length}/5)',
+                      label: '${AppStrings.get("badge_prayers", lang)} (${today.prayers.length}/5)',
                       isDone: today.prayers.isNotEmpty,
                       isDark: isDark,
                     ),
@@ -1450,7 +1454,8 @@ class _LanguageOnboardingDialog extends StatefulWidget {
 }
 
 class _LanguageOnboardingDialogState extends State<_LanguageOnboardingDialog> {
-  bool _enablePhoneticAndTranslation = true;
+  String _selectedLanguage = 'fr';
+  bool _selectedPhonetic = true;
 
   @override
   Widget build(BuildContext context) {
@@ -1533,22 +1538,28 @@ class _LanguageOnboardingDialogState extends State<_LanguageOnboardingDialog> {
             _buildOptionCard(
               theme: theme,
               isDark: isDark,
-              isSelected: _enablePhoneticAndTranslation,
-              title: 'عربي + نطق صوتي وترجمة (Recommandé)',
-              subtitle: 'Arabe + Phonétique latine & Traduction française',
+              isSelected: _selectedLanguage == 'fr',
+              title: 'Français (avec phonétique)',
+              subtitle: 'Interface en français + aide textuelle à la lecture',
               onTap: () {
-                setState(() => _enablePhoneticAndTranslation = true);
+                setState(() {
+                  _selectedLanguage = 'fr';
+                  _selectedPhonetic = true;
+                });
               },
             ),
             const SizedBox(height: 10),
             _buildOptionCard(
               theme: theme,
               isDark: isDark,
-              isSelected: !_enablePhoneticAndTranslation,
-              title: 'عربي فقط (Arabe uniquement)',
-              subtitle: 'Texte arabe traditionnel sans phonétique',
+              isSelected: _selectedLanguage == 'ar',
+              title: 'العربية (Arabe classique)',
+              subtitle: 'واجهة عربية كاملة للقراءة المباشرة',
               onTap: () {
-                setState(() => _enablePhoneticAndTranslation = false);
+                setState(() {
+                  _selectedLanguage = 'ar';
+                  _selectedPhonetic = false;
+                });
               },
             ),
             const SizedBox(height: 24),
@@ -1558,8 +1569,8 @@ class _LanguageOnboardingDialogState extends State<_LanguageOnboardingDialog> {
               child: ElevatedButton(
                 onPressed: () {
                   widget.settingsProvider.completeOnboarding(
-                    showPhonetic: _enablePhoneticAndTranslation,
-                    showTranslation: _enablePhoneticAndTranslation,
+                    language: _selectedLanguage,
+                    showPhonetic: _selectedPhonetic,
                   );
                   Navigator.of(context).pop();
                 },

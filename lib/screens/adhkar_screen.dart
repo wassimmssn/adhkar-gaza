@@ -7,6 +7,7 @@ import '../providers/settings_provider.dart';
 import '../providers/streak_provider.dart';
 import '../models/dhikr.dart';
 import '../services/audio_service.dart';
+import '../l10n/app_strings.dart';
 import '../widgets/glass_widgets.dart';
 
 class AdhkarScreen extends StatelessWidget {
@@ -484,21 +485,10 @@ class _DhikrViewState extends State<_DhikrView>
                     const SizedBox(height: 12),
                     _LanguageBox(
                       icon: Icons.record_voice_over_rounded,
-                      title: 'النطق الصوتي (Phonétique)',
+                      title: settingsProvider.isFrench
+                          ? 'Transcription phonétique'
+                          : 'النطق الصوتي (Phonétique)',
                       content: dhikr.phonetic,
-                      theme: theme,
-                      isDark: isDark,
-                      isLtr: true,
-                    ),
-                  ],
-
-                  // ── French Translation Box (when enabled in settings) ──
-                  if (settingsProvider.showTranslation && dhikr.translation.isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    _LanguageBox(
-                      icon: Icons.menu_book_rounded,
-                      title: 'الترجمة الفرنسية (Traduction)',
-                      content: dhikr.translation,
                       theme: theme,
                       isDark: isDark,
                       isLtr: true,
@@ -1589,6 +1579,7 @@ class _AudioRecitationPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPlaying = audioService.isCurrentPlaying(dhikr.text);
+    final lang = Provider.of<SettingsProvider>(context).language;
 
     return InkWell(
       onTap: () {
@@ -1632,7 +1623,7 @@ class _AudioRecitationPill extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Text(
-              isPlaying ? 'إيقاف التلاوة (Arrêter)' : 'استمع للنطق (Écouter)',
+              isPlaying ? AppStrings.get('stop_audio', lang) : AppStrings.get('listen_audio', lang),
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 13,

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/theme_provider.dart';
 import '../services/notification_service.dart';
+import '../l10n/app_strings.dart';
 import '../widgets/glass_widgets.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -14,12 +15,13 @@ class SettingsScreen extends StatelessWidget {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final settingsProvider = Provider.of<SettingsProvider>(context);
     final isDark = theme.brightness == Brightness.dark;
+    final lang = settingsProvider.language;
 
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
-      appBar: const GlassAppBar(
-        title: 'الإعدادات',
+      appBar: GlassAppBar(
+        title: AppStrings.get('settings_title', lang),
         scrollOffset: 50,
         showBackButton: false,
       ),
@@ -37,7 +39,7 @@ class SettingsScreen extends StatelessWidget {
           // ═════════════════════════════════════════════
           _SectionHeader(
             icon: Icons.palette_outlined,
-            title: 'المظهر',
+            title: AppStrings.get('appearance', lang),
             theme: theme,
           ),
           const SizedBox(height: 12),
@@ -52,7 +54,7 @@ class SettingsScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: Text(
-                    'وضع المظهر',
+                    AppStrings.get('theme_mode', lang),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
@@ -75,7 +77,7 @@ class SettingsScreen extends StatelessWidget {
           // ═════════════════════════════════════════════
           _SectionHeader(
             icon: Icons.touch_app_outlined,
-            title: 'التفاعل',
+            title: AppStrings.get('interaction', lang),
             theme: theme,
           ),
           const SizedBox(height: 12),
@@ -106,14 +108,14 @@ class SettingsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'تأكيد بلمس الشاشة',
+                        AppStrings.get('tap_confirm', lang),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        'اضغط في أي مكان على الشاشة لتأكيد الذكر',
+                        AppStrings.get('tap_confirm_desc', lang),
                         style: theme.textTheme.bodySmall,
                       ),
                     ],
@@ -135,7 +137,7 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 28),
           _SectionHeader(
             icon: Icons.translate_rounded,
-            title: 'اللغة والنطق (Phonétique & Langues)',
+            title: AppStrings.get('language_section', lang),
             theme: theme,
           ),
           const SizedBox(height: 12),
@@ -143,7 +145,26 @@ class SettingsScreen extends StatelessWidget {
             theme: theme,
             isDark: isDark,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    AppStrings.get('app_language', lang),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                _SlidingLanguageSelector(
+                  currentLanguage: settingsProvider.language,
+                  onChanged: (newLang) => settingsProvider.setLanguage(newLang),
+                  theme: theme,
+                  isDark: isDark,
+                ),
+                const SizedBox(height: 16),
+                const Divider(height: 1, thickness: 0.5),
+                const SizedBox(height: 16),
                 // Phonetic toggle
                 Row(
                   children: [
@@ -166,14 +187,14 @@ class SettingsScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'النطق الصوتي (Phonétique)',
+                            AppStrings.get('phonetic_toggle', lang),
                             style: theme.textTheme.bodyMedium?.copyWith(
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'إظهار قراءة الأذكار بالحروف اللاتينية للمساعدة على النطق',
+                            AppStrings.get('phonetic_desc', lang),
                             style: theme.textTheme.bodySmall,
                           ),
                         ],
@@ -183,51 +204,6 @@ class SettingsScreen extends StatelessWidget {
                     Switch.adaptive(
                       value: settingsProvider.showPhonetic,
                       onChanged: (value) => settingsProvider.setShowPhonetic(value),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                const Divider(height: 1, thickness: 0.5),
-                const SizedBox(height: 14),
-                // French Translation toggle
-                Row(
-                  children: [
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.15 : 0.08),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(
-                        Icons.menu_book_rounded,
-                        color: theme.colorScheme.primary,
-                        size: 22,
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'الترجمة الفرنسية (Traduction)',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'إظهار المعنى باللغة الفرنسية تحت كل ذكر',
-                            style: theme.textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Switch.adaptive(
-                      value: settingsProvider.showTranslation,
-                      onChanged: (value) => settingsProvider.setShowTranslation(value),
                     ),
                   ],
                 ),
@@ -819,6 +795,111 @@ class _SlidingThemeSelector extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _SlidingLanguageSelector extends StatelessWidget {
+  final String currentLanguage;
+  final ValueChanged<String> onChanged;
+  final ThemeData theme;
+  final bool isDark;
+
+  const _SlidingLanguageSelector({
+    required this.currentLanguage,
+    required this.onChanged,
+    required this.theme,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isArabic = currentLanguage == 'ar';
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final halfWidth = constraints.maxWidth / 2;
+        return Container(
+          height: 48,
+          decoration: BoxDecoration(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : theme.colorScheme.primary.withValues(alpha: 0.04),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Stack(
+            children: [
+              // Animated pill slider
+              AnimatedPositioned(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeInOutCubic,
+                left: isArabic ? 0 : halfWidth,
+                top: 3,
+                bottom: 3,
+                width: halfWidth,
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary,
+                    borderRadius: BorderRadius.circular(13),
+                    boxShadow: [
+                      BoxShadow(
+                        color: theme.colorScheme.primary.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Labels row
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => onChanged('ar'),
+                      child: Center(
+                        child: Text(
+                          'العربية',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: isArabic
+                                ? Colors.white
+                                : (isDark ? Colors.white70 : theme.colorScheme.onSurface),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: () => onChanged('fr'),
+                      child: Center(
+                        child: Text(
+                          'Français',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: !isArabic
+                                ? Colors.white
+                                : (isDark ? Colors.white70 : theme.colorScheme.onSurface),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

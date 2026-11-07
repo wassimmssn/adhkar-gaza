@@ -34,9 +34,10 @@ class AdhkarGazaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final settingsProvider = Provider.of<SettingsProvider>(context);
 
     return MaterialApp(
-      title: 'أذكار غزة',
+      title: settingsProvider.isFrench ? 'Adhkar Gaza' : 'أذكار غزة',
       debugShowCheckedModeBanner: false,
 
       // ── Theme ───────────────────────────────────
@@ -44,9 +45,9 @@ class AdhkarGazaApp extends StatelessWidget {
       darkTheme: AppTheme.darkTheme,
       themeMode: themeProvider.themeMode,
 
-      // ── RTL & Arabic Locale ─────────────────────
-      locale: const Locale('ar'),
-      supportedLocales: const [Locale('ar')],
+      // ── Directionality & Locale ─────────────────
+      locale: Locale(settingsProvider.language),
+      supportedLocales: const [Locale('ar'), Locale('fr')],
       localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

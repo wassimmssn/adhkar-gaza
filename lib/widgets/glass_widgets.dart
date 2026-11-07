@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../services/pwa_install_service.dart';
+import '../providers/settings_provider.dart';
+import '../l10n/app_strings.dart';
 import '../screens/settings_screen.dart';
 
 // ══════════════════════════════════════════════════════════════════════════════
@@ -279,6 +281,8 @@ class FloatingGlassDock extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final pwa = Provider.of<PwaInstallService>(context);
+    final settings = Provider.of<SettingsProvider>(context);
+    final lang = settings.language;
     final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     final dockBg = isDark ? const Color(0xD9131B2E) : const Color(0xEEFFFFFF);
@@ -327,7 +331,7 @@ class FloatingGlassDock extends StatelessWidget {
                 // 1. Home Button
                 _DockItem(
                   icon: Icons.home_rounded,
-                  label: 'الرئيسية',
+                  label: AppStrings.get('home', lang),
                   isActive: activeIndex == 0,
                   isDark: isDark,
                   onTap: () {
@@ -341,7 +345,7 @@ class FloatingGlassDock extends StatelessWidget {
                 // 2. Share Button
                 _DockItem(
                   icon: Icons.share_rounded,
-                  label: 'مشاركة',
+                  label: AppStrings.get('share', lang),
                   isActive: activeIndex == 1,
                   isDark: isDark,
                   onTap: () => _shareApp(context),
@@ -351,7 +355,7 @@ class FloatingGlassDock extends StatelessWidget {
                 if (pwa.shouldShowPrompt)
                   _DockItem(
                     icon: Icons.download_rounded,
-                    label: 'تثبيت',
+                    label: AppStrings.get('install', lang),
                     isActive: false,
                     isDark: isDark,
                     badgeColor: isDark
@@ -368,7 +372,7 @@ class FloatingGlassDock extends StatelessWidget {
                 // 4. Settings Button
                 _DockItem(
                   icon: Icons.settings_rounded,
-                  label: 'الإعدادات',
+                  label: AppStrings.get('settings', lang),
                   isActive: activeIndex == 3,
                   isDark: isDark,
                   onTap: () {
