@@ -31,6 +31,9 @@
   <title>Adhkar Gaza - أذكار غزة</title>
   <link rel="manifest" href="manifest.json">
 
+  <!-- Preload core scripts -->
+  <link rel="preload" href="flutter.js" as="script">
+
   <script>
     // ── Web Push Subscription Helpers ──────────────────────────────────────
     const WORKER_URL = 'https://adhkar-push.wassimbousmaa.workers.dev';
@@ -227,9 +230,139 @@
   </script>
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
+
+  <style>
+    /* ── Immediate Splash Screen (Zero perceived loading time) ── */
+    :root {
+      --bg-color: #0b131e;
+      --text-main: #f8fafc;
+      --text-sub: #94a3b8;
+      --accent: #14b8a6;
+      --spinner-bg: rgba(20, 184, 166, 0.18);
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg-color: #f8fafc;
+        --text-main: #0f172a;
+        --text-sub: #64748b;
+        --accent: #0d9488;
+        --spinner-bg: rgba(13, 148, 136, 0.15);
+      }
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      overflow: hidden;
+    }
+
+    #app-splash {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: var(--bg-color);
+      z-index: 999999;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    #app-splash.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .splash-logo-container {
+      position: relative;
+      width: 96px;
+      height: 96px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .splash-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 22px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+      animation: pulse-logo 2.6s infinite ease-in-out;
+    }
+
+    @keyframes pulse-logo {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
+    .splash-title-ar {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .splash-title-fr {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 26px;
+    }
+
+    .splash-spinner-container {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      margin-bottom: 16px;
+    }
+
+    .splash-spinner {
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      border-radius: 50%;
+      border: 3px solid var(--spinner-bg);
+      border-top-color: var(--accent);
+      animation: spin 0.9s cubic-bezier(0.55, 0.15, 0.45, 0.85) infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .splash-status {
+      font-size: 13px;
+      color: var(--text-sub);
+      letter-spacing: 0.3px;
+      font-weight: 500;
+    }
+  </style>
 </head>
 
 <body>
+  <!-- Immediate Splash Screen -->
+  <div id="app-splash">
+    <div class="splash-logo-container">
+      <img class="splash-logo" src="favicon.png" alt="Logo">
+    </div>
+    <div class="splash-title-ar">أذكار غزة</div>
+    <div class="splash-title-fr">Adhkar Gaza</div>
+    <div class="splash-spinner-container">
+      <div class="splash-spinner"></div>
+    </div>
+    <div class="splash-status">جاري التحميل... / Chargement...</div>
+  </div>
+
   <script>
     window.addEventListener('load', function (ev) {
       if ('serviceWorker' in navigator) {
@@ -259,7 +392,16 @@
             renderer: "html",
             useColorEmoji: true
           }).then(function (appRunner) {
-            appRunner.runApp();
+            appRunner.runApp().then(function () {
+              // Smoothly dismiss splash screen when Flutter UI is rendered
+              setTimeout(function () {
+                const splash = document.getElementById('app-splash');
+                if (splash) {
+                  splash.classList.add('fade-out');
+                  setTimeout(function () { splash.remove(); }, 500);
+                }
+              }, 120);
+            });
           });
         }
       });

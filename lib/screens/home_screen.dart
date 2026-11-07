@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/adhkar_provider.dart';
+import '../providers/settings_provider.dart';
 import '../providers/streak_provider.dart';
 import '../services/pwa_install_service.dart';
 import 'adhkar_screen.dart';
@@ -42,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _handleUrlParameters();
+      _checkFirstLaunchLanguageSelection();
     });
   }
 
@@ -54,6 +56,25 @@ class _HomeScreenState extends State<HomeScreen>
         _clearUrlParameters();
       }
     } catch (_) {}
+  }
+
+  
+  void _checkFirstLaunchLanguageSelection() {
+    final settings = Provider.of<SettingsProvider>(context, listen: false);
+    if (!settings.hasCompletedOnboarding) {
+      _showOnboardingLanguageDialog(context, settings);
+    }
+  }
+
+  void _showOnboardingLanguageDialog(
+      BuildContext context, SettingsProvider settingsProvider) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return _LanguageOnboardingDialog(settingsProvider: settingsProvider);
+      },
+    );
   }
 
   void _clearUrlParameters() {
@@ -1410,6 +1431,235 @@ class _MiniStatusPill extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  LANGUAGE ONBOARDING DIALOG (FIRST LAUNCH)
+// ══════════════════════════════════════════════════════
+class _LanguageOnboardingDialog extends StatefulWidget {
+  final SettingsProvider settingsProvider;
+
+  const _LanguageOnboardingDialog({required this.settingsProvider});
+
+  @override
+  State<_LanguageOnboardingDialog> createState() =>
+      _LanguageOnboardingDialogState();
+}
+
+class _LanguageOnboardingDialogState extends State<_LanguageOnboardingDialog> {
+  bool _enablePhoneticAndTranslation = true;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      child: Container(
+        constraints: const BoxConstraints(maxWidth: 440),
+        padding: const EdgeInsets.all(26),
+        decoration: BoxDecoration(
+          color: isDark
+              ? const Color(0xFF0F172A).withValues(alpha: 0.96)
+              : Colors.white.withValues(alpha: 0.96),
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(
+            color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.25 : 0.15),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.15),
+              blurRadius: 30,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 54,
+              height: 54,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: theme.colorScheme.primary.withValues(alpha: 0.25),
+                ),
+              ),
+              child: Icon(
+                Icons.translate_rounded,
+                color: theme.colorScheme.primary,
+                size: 28,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'مرحباً بك في أذكار غزة',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 21,
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.onSurface,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'Bienvenue sur Adhkar Gaza',
+              style: TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.primary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 14),
+            Text(
+              'اختر طريقة العرض المفضلة لديك لقراءة الأذكار\n(يمكنك تغييرها دائماً من الإعدادات) :',
+              style: theme.textTheme.bodySmall?.copyWith(
+                height: 1.5,
+                fontSize: 12.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 18),
+            _buildOptionCard(
+              theme: theme,
+              isDark: isDark,
+              isSelected: _enablePhoneticAndTranslation,
+              title: 'عربي + نطق صوتي وترجمة (Recommandé)',
+              subtitle: 'Arabe + Phonétique latine & Traduction française',
+              onTap: () {
+                setState(() => _enablePhoneticAndTranslation = true);
+              },
+            ),
+            const SizedBox(height: 10),
+            _buildOptionCard(
+              theme: theme,
+              isDark: isDark,
+              isSelected: !_enablePhoneticAndTranslation,
+              title: 'عربي فقط (Arabe uniquement)',
+              subtitle: 'Texte arabe traditionnel sans phonétique',
+              onTap: () {
+                setState(() => _enablePhoneticAndTranslation = false);
+              },
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () {
+                  widget.settingsProvider.completeOnboarding(
+                    showPhonetic: _enablePhoneticAndTranslation,
+                    showTranslation: _enablePhoneticAndTranslation,
+                  );
+                  Navigator.of(context).pop();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'ابدأ الآن — Commencer',
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Icon(Icons.arrow_forward_rounded, size: 18),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOptionCard({
+    required ThemeData theme,
+    required bool isDark,
+    required bool isSelected,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.2 : 0.1)
+              : (isDark ? Colors.white.withValues(alpha: 0.03) : Colors.black.withValues(alpha: 0.02)),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected
+                ? theme.colorScheme.primary
+                : theme.colorScheme.onSurface.withValues(alpha: 0.1),
+            width: isSelected ? 1.8 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isSelected
+                  ? Icons.check_circle_rounded
+                  : Icons.radio_button_unchecked_rounded,
+              color: isSelected
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.onSurface.withValues(alpha: 0.4),
+              size: 22,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13.5,
+                      color: isSelected
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -5,6 +5,9 @@ class Dhikr {
   final String reference;
   final String bienfaits;
   final bool isPriority;
+  final String phonetic;
+  final String translation;
+  final String? audioUrl;
 
   const Dhikr({
     required this.category,
@@ -13,6 +16,9 @@ class Dhikr {
     required this.reference,
     this.bienfaits = '',
     this.isPriority = false,
+    this.phonetic = '',
+    this.translation = '',
+    this.audioUrl,
   });
 
   factory Dhikr.fromJson(Map<String, dynamic> json) {
@@ -23,6 +29,9 @@ class Dhikr {
       reference: json['reference'] as String,
       bienfaits: (json['bienfaits'] as String?) ?? '',
       isPriority: (json['isPriority'] as bool?) ?? false,
+      phonetic: (json['phonetic'] as String?) ?? '',
+      translation: (json['translation'] as String?) ?? '',
+      audioUrl: json['audioUrl'] as String?,
     );
   }
 }

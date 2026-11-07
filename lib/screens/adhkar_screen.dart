@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import '../providers/adhkar_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/streak_provider.dart';
+import '../models/dhikr.dart';
+import '../services/audio_service.dart';
 import '../widgets/glass_widgets.dart';
 
 class AdhkarScreen extends StatelessWidget {
@@ -83,6 +85,11 @@ class _DhikrViewState extends State<_DhikrView>
 
   void _onCounterTap(AdhkarProvider provider, [Offset? tapPosition]) {
     final wasLastTap = provider.remainingCount == 1;
+    if (wasLastTap) {
+      try {
+        Provider.of<AudioService>(context, listen: false).stop();
+      } catch (_) {}
+    }
     final accepted = provider.decrementCounter();
     if (accepted) {
       try {
@@ -142,8 +149,9 @@ class _DhikrViewState extends State<_DhikrView>
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final progress = (provider.currentIndex + 1) / provider.totalCount;
-    final tapToConfirm =
-        Provider.of<SettingsProvider>(context).tapToConfirm;
+    final settingsProvider = Provider.of<SettingsProvider>(context);
+    final audioService = Provider.of<AudioService>(context);
+    final tapToConfirm = settingsProvider.tapToConfirm;
 
     final content = Column(
       children: [
@@ -461,6 +469,42 @@ class _DhikrViewState extends State<_DhikrView>
                       ],
                     ),
                   ),
+                  const SizedBox(height: 14),
+
+                  // ── Audio recitation button ───────────
+                  _AudioRecitationPill(
+                    dhikr: dhikr,
+                    audioService: audioService,
+                    theme: theme,
+                    isDark: isDark,
+                  ),
+
+                  // ── Phonetic Box (when enabled in settings) ──
+                  if (settingsProvider.showPhonetic && dhikr.phonetic.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    _LanguageBox(
+                      icon: Icons.record_voice_over_rounded,
+                      title: 'النطق الصوتي (Phonétique)',
+                      content: dhikr.phonetic,
+                      theme: theme,
+                      isDark: isDark,
+                      isLtr: true,
+                    ),
+                  ],
+
+                  // ── French Translation Box (when enabled in settings) ──
+                  if (settingsProvider.showTranslation && dhikr.translation.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    _LanguageBox(
+                      icon: Icons.menu_book_rounded,
+                      title: 'الترجمة الفرنسية (Traduction)',
+                      content: dhikr.translation,
+                      theme: theme,
+                      isDark: isDark,
+                      isLtr: true,
+                    ),
+                  ],
+
                   const SizedBox(height: 16),
 
                   // ── Floating counter badge in fullscreen-tap mode ──
@@ -1524,4 +1568,152 @@ class _ConfettiPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _ConfettiPainter oldDelegate) =>
       oldDelegate.progress != progress;
+}
+
+// ══════════════════════════════════════════════════════
+//  AUDIO RECITATION PILL
+// ══════════════════════════════════════════════════════
+class _AudioRecitationPill extends StatelessWidget {
+  final Dhikr dhikr;
+  final AudioService audioService;
+  final ThemeData theme;
+  final bool isDark;
+
+  const _AudioRecitationPill({
+    required this.dhikr,
+    required this.audioService,
+    required this.theme,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isPlaying = audioService.isCurrentPlaying(dhikr.text);
+
+    return InkWell(
+      onTap: () {
+        audioService.playDhikr(
+          id: dhikr.text,
+          arabicText: dhikr.text,
+          audioUrl: dhikr.audioUrl,
+        );
+      },
+      borderRadius: BorderRadius.circular(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          color: isPlaying
+              ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.25 : 0.15)
+              : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white.withValues(alpha: 0.9)),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isPlaying
+                ? theme.colorScheme.primary
+                : theme.colorScheme.primary.withValues(alpha: isDark ? 0.2 : 0.12),
+            width: isPlaying ? 1.5 : 1,
+          ),
+          boxShadow: [
+            if (isPlaying)
+              BoxShadow(
+                color: theme.colorScheme.primary.withValues(alpha: 0.25),
+                blurRadius: 12,
+                spreadRadius: 1,
+              ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isPlaying ? Icons.stop_circle_rounded : Icons.volume_up_rounded,
+              size: 20,
+              color: theme.colorScheme.primary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              isPlaying ? 'إيقاف التلاوة (Arrêter)' : 'استمع للنطق (Écouter)',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: theme.colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  LANGUAGE BOX (Phonetic / Translation)
+// ══════════════════════════════════════════════════════
+class _LanguageBox extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String content;
+  final ThemeData theme;
+  final bool isDark;
+  final bool isLtr;
+
+  const _LanguageBox({
+    required this.icon,
+    required this.title,
+    required this.content,
+    required this.theme,
+    required this.isDark,
+    this.isLtr = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.03)
+            : Colors.white.withValues(alpha: 0.85),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.12 : 0.08),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: isLtr ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: theme.colorScheme.primary),
+              const SizedBox(width: 6),
+              Text(
+                title,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            content,
+            style: TextStyle(
+              fontSize: 14.5,
+              height: 1.6,
+              fontStyle: isLtr ? FontStyle.italic : FontStyle.normal,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+            ),
+            textAlign: isLtr ? TextAlign.left : TextAlign.right,
+            textDirection: isLtr ? TextDirection.ltr : TextDirection.rtl,
+          ),
+        ],
+      ),
+    );
+  }
 }

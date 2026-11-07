@@ -130,6 +130,112 @@ class SettingsScreen extends StatelessWidget {
           ),
 
           // ═════════════════════════════════════════════
+          //  LANGUAGE & PHONETIC SECTION
+          // ═════════════════════════════════════════════
+          const SizedBox(height: 28),
+          _SectionHeader(
+            icon: Icons.translate_rounded,
+            title: 'اللغة والنطق (Phonétique & Langues)',
+            theme: theme,
+          ),
+          const SizedBox(height: 12),
+          _GlassCard(
+            theme: theme,
+            isDark: isDark,
+            child: Column(
+              children: [
+                // Phonetic toggle
+                Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.15 : 0.08),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(
+                        Icons.record_voice_over_rounded,
+                        color: theme.colorScheme.primary,
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'النطق الصوتي (Phonétique)',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'إظهار قراءة الأذكار بالحروف اللاتينية للمساعدة على النطق',
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Switch.adaptive(
+                      value: settingsProvider.showPhonetic,
+                      onChanged: (value) => settingsProvider.setShowPhonetic(value),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                const Divider(height: 1, thickness: 0.5),
+                const SizedBox(height: 14),
+                // French Translation toggle
+                Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.15 : 0.08),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(
+                        Icons.menu_book_rounded,
+                        color: theme.colorScheme.primary,
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'الترجمة الفرنسية (Traduction)',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'إظهار المعنى باللغة الفرنسية تحت كل ذكر',
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Switch.adaptive(
+                      value: settingsProvider.showTranslation,
+                      onChanged: (value) => settingsProvider.setShowTranslation(value),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // ═════════════════════════════════════════════
           //  NOTIFICATIONS SECTION
           // ═════════════════════════════════════════════
           const SizedBox(height: 28),
