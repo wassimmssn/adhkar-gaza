@@ -1451,6 +1451,7 @@ class _LanguageOnboardingDialog extends StatefulWidget {
 class _LanguageOnboardingDialogState extends State<_LanguageOnboardingDialog> {
   String _selectedLanguage = 'fr';
   bool _selectedPhonetic = true;
+  bool _selectedAudio = true;
 
   @override
   Widget build(BuildContext context) {
@@ -1557,7 +1558,85 @@ class _LanguageOnboardingDialogState extends State<_LanguageOnboardingDialog> {
                 });
               },
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+            // Assistance options preview
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.08 : 0.04),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.15 : 0.08),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _selectedLanguage == 'fr'
+                        ? 'Options d’aide (modifiables à tout moment) :'
+                        : 'خيارات المساعدة (يمكن تغييرها دائماً) :',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: theme.colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Audio option row
+                  InkWell(
+                    onTap: () => setState(() => _selectedAudio = !_selectedAudio),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.volume_up_rounded,
+                          size: 18,
+                          color: _selectedAudio ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _selectedLanguage == 'fr' ? 'Écoute audio vocale' : 'زر الاستماع الصوتي',
+                            style: TextStyle(fontFamily: 'Cairo', fontSize: 12.5, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        Switch.adaptive(
+                          value: _selectedAudio,
+                          onChanged: (v) => setState(() => _selectedAudio = v),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 12, thickness: 0.5),
+                  // Phonetic option row
+                  InkWell(
+                    onTap: () => setState(() => _selectedPhonetic = !_selectedPhonetic),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.record_voice_over_rounded,
+                          size: 18,
+                          color: _selectedPhonetic ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _selectedLanguage == 'fr' ? 'Aide phonétique latine' : 'المساعدة الصوتية اللاتينية',
+                            style: TextStyle(fontFamily: 'Cairo', fontSize: 12.5, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        Switch.adaptive(
+                          value: _selectedPhonetic,
+                          onChanged: (v) => setState(() => _selectedPhonetic = v),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               height: 48,
@@ -1566,6 +1645,7 @@ class _LanguageOnboardingDialogState extends State<_LanguageOnboardingDialog> {
                   widget.settingsProvider.completeOnboarding(
                     language: _selectedLanguage,
                     showPhonetic: _selectedPhonetic,
+                    showAudio: _selectedAudio,
                   );
                   Navigator.of(context).pop();
                 },

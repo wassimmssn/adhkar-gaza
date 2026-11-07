@@ -472,13 +472,15 @@ class _DhikrViewState extends State<_DhikrView>
                   ),
                   const SizedBox(height: 14),
 
-                  // ── Audio recitation button ───────────
-                  _AudioRecitationPill(
-                    dhikr: dhikr,
-                    audioService: audioService,
-                    theme: theme,
-                    isDark: isDark,
-                  ),
+                  // ── Audio recitation button (when enabled in settings) ──
+                  if (settingsProvider.showAudio) ...[
+                    _AudioRecitationPill(
+                      dhikr: dhikr,
+                      audioService: audioService,
+                      theme: theme,
+                      isDark: isDark,
+                    ),
+                  ],
 
                   // ── Phonetic Box (when enabled in settings) ──
                   if (settingsProvider.showPhonetic && dhikr.phonetic.isNotEmpty) ...[

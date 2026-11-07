@@ -163,6 +163,26 @@ class AppStrings {
       'ar': 'Français',
       'fr': 'Français',
     },
+    'audio_toggle': {
+      'ar': 'الاستماع الصوتي للأذكار',
+      'fr': 'Écoute audio des invocations',
+    },
+    'audio_desc': {
+      'ar': 'إظهار زر الاستماع للتلاوة في بطاقة كل ذكر',
+      'fr': 'Afficher le bouton d’écoute de la récitation sur chaque carte',
+    },
+    'onboard_assistance_title': {
+      'ar': 'خيارات المساعدة في القراءة والتلاوة :',
+      'fr': 'Options d’assistance à la lecture :',
+    },
+    'onboard_audio_label': {
+      'ar': 'زر الاستماع الصوتي (Audio)',
+      'fr': 'Bouton d’écoute vocale (Audio)',
+    },
+    'onboard_phonetic_label': {
+      'ar': 'المساعدة الصوتية باللاتينية (Phonétique)',
+      'fr': 'Transcription phonétique latine',
+    },
     'phonetic_toggle': {
       'ar': 'النطق الصوتي (Phonétique)',
       'fr': 'Aide à la lecture phonétique',

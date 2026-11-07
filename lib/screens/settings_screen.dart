@@ -208,6 +208,51 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ],
                 ),
+                const SizedBox(height: 14),
+                const Divider(height: 1, thickness: 0.5),
+                const SizedBox(height: 14),
+                // Audio recitation toggle
+                Row(
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.primary.withValues(alpha: isDark ? 0.15 : 0.08),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(
+                        Icons.volume_up_rounded,
+                        color: theme.colorScheme.primary,
+                        size: 22,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            AppStrings.get('audio_toggle', lang),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            AppStrings.get('audio_desc', lang),
+                            style: theme.textTheme.bodySmall,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Switch.adaptive(
+                      value: settingsProvider.showAudio,
+                      onChanged: (value) => settingsProvider.setShowAudio(value),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
