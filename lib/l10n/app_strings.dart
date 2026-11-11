@@ -400,6 +400,176 @@ class AppStrings {
       'ar': 'إخفاء',
       'fr': 'Fermer',
     },
+
+    // ── Streak Dashboard & Calendar ──
+    'sijil_title': {
+      'ar': 'سجل الالتزام',
+      'fr': 'Suivi de régularité',
+    },
+    'sijil_subtitle': {
+      'ar': 'سجل المداومة على الأذكار',
+      'fr': 'Registre d’assiduité aux invocations',
+    },
+    'sijil_hadith': {
+      'ar': '«أَحَبُّ الأَعْمَالِ إِلَى اللَّهِ أَدْوَمُهَا وَإِنْ قَلَّ»',
+      'fr': '« Les actes les plus aimés d’Allah sont les plus constants, même minimes »',
+    },
+    'sijil_current_streak': {
+      'ar': 'السلسلة الحالية',
+      'fr': 'Série actuelle',
+    },
+    'sijil_best_streak': {
+      'ar': 'أفضل التزام',
+      'fr': 'Meilleure série',
+    },
+    'sijil_total_sessions': {
+      'ar': 'إجمالي الأوراد',
+      'fr': 'Total des séances',
+    },
+    'sijil_unit_days': {
+      'ar': 'أيام',
+      'fr': 'jours',
+    },
+    'sijil_unit_sessions': {
+      'ar': 'وِردًا',
+      'fr': 'séances',
+    },
+    'sijil_today_adhkar': {
+      'ar': 'أوراد اليوم',
+      'fr': 'Invocations du jour',
+    },
+    'sijil_calendar': {
+      'ar': 'تقويم الالتزام',
+      'fr': 'Calendrier d’engagement',
+    },
+    'sijil_wisdom_title': {
+      'ar': 'فضل المداومة على الذكر',
+      'fr': 'Mérite de la constance dans le rappel',
+    },
+    'sijil_wisdom_text': {
+      'ar': 'قال الإمام النووي رحمه الله: ينبغي لمن كان له وظيفة من الذكر في وقت من ليل أو نهار أو عقب صلاة أو حال من الأحوال ففاتته، أن يتداركها ويأتي بها إذا تمكن منها ولا يهملها، فإنه إذا اعتاد ملازمتها لم يعرضها للتفويت.',
+      'fr': 'L’Imam an-Nawawi رحمه الله a dit : « Celui qui a une routine d’invocations de jour comme de nuit, ou après une prière, et la manque, doit la rattraper dès qu’il le peut sans la négliger afin de préserver sa constance. »',
+    },
+    'sijil_no_activity': {
+      'ar': 'لم يتم تسجيل أوراد في هذا اليوم',
+      'fr': 'Aucune invocation enregistrée ce jour-là',
+    },
+    'sijil_day_details': {
+      'ar': 'تفاصيل يوم {day} {month} {year}',
+      'fr': 'Détails du {day} {month} {year}',
+    },
+    'sijil_prayers_count': {
+      'ar': 'أذكار الصلوات ({count}/5)',
+      'fr': 'Invocations des prières ({count}/5)',
+    },
+    'sijil_not_recorded': {
+      'ar': 'لم تسجل',
+      'fr': 'Non enregistrées',
+    },
+    'sijil_after_prayers': {
+      'ar': 'أذكار بعد الصلوات',
+      'fr': 'Invocations après les prières',
+    },
+    'sijil_prayers_ratio': {
+      'ar': '{count}/5 صلوات',
+      'fr': '{count}/5 prières',
+    },
+    'sijil_completed': {
+      'ar': 'تم بحمد الله',
+      'fr': 'Accompli',
+    },
+    'sijil_pending': {
+      'ar': 'في الانتظار',
+      'fr': 'En attente',
+    },
+
+    // ── Months & Weekdays ──
+    'month_1': {'ar': 'يناير', 'fr': 'Janvier'},
+    'month_2': {'ar': 'فبراير', 'fr': 'Février'},
+    'month_3': {'ar': 'مارس', 'fr': 'Mars'},
+    'month_4': {'ar': 'أبريل', 'fr': 'Avril'},
+    'month_5': {'ar': 'مايو', 'fr': 'Mai'},
+    'month_6': {'ar': 'يونيو', 'fr': 'Juin'},
+    'month_7': {'ar': 'يوليو', 'fr': 'Juillet'},
+    'month_8': {'ar': 'أغسطس', 'fr': 'Août'},
+    'month_9': {'ar': 'سبتمبر', 'fr': 'Septembre'},
+    'month_10': {'ar': 'أكتوبر', 'fr': 'Octobre'},
+    'month_11': {'ar': 'نوفمبر', 'fr': 'Novembre'},
+    'month_12': {'ar': 'ديسمبر', 'fr': 'Décembre'},
+
+    'weekday_0': {'ar': 'أحد', 'fr': 'Dim'},
+    'weekday_1': {'ar': 'إثن', 'fr': 'Lun'},
+    'weekday_2': {'ar': 'ثلا', 'fr': 'Mar'},
+    'weekday_3': {'ar': 'أرب', 'fr': 'Mer'},
+    'weekday_4': {'ar': 'خمي', 'fr': 'Jeu'},
+    'weekday_5': {'ar': 'جمع', 'fr': 'Ven'},
+    'weekday_6': {'ar': 'سبت', 'fr': 'Sam'},
+
+    // ── Completion & Adhkar Screen ──
+    'completion_hadith_title': {
+      'ar': 'وصية النبي ﷺ لمعاذ بن جبل رضي الله عنه',
+      'fr': 'Recommandation du Prophète ﷺ à Mu’adh ibn Jabal رضي الله عنه',
+    },
+    'completion_hadith_text': {
+      'ar': '«يَا مُعَاذُ، وَاللَّهِ إِنِّي لَأُحِبُّكَ، فَلَا تَدَعَنَّ فِي دُبُرِ كُلِّ صَلَاةٍ أَنْ تَقُولَ: اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ»',
+      'fr': '« Ô Mu’adh, par Allah je t’aime ! Ne manque donc pas de dire après chaque prière : Ô Allah, aide-moi à me rappeler de Toi, à Te remercier et à T’adorer avec excellence. »',
+    },
+    'completion_quote_title': {
+      'ar': 'قال الإمام ابن القيم رحمه الله',
+      'fr': 'L’Imam Ibn al-Qayyim رحمه الله a dit',
+    },
+    'completion_quote_text': {
+      'ar': 'أذكار الصباح والمساء بمثابة الدرع، كلما زادت سماكته لم يتأثر صاحبه، بل تصل قوة الدرع أن يعود السهم فيصيب من أطلقه.',
+      'fr': '« Les invocations du matin et du soir sont comme une armure : plus son épaisseur augmente, plus son porteur est protégé face aux épreuves. »',
+    },
+    'completion_prayer_title': {
+      'ar': 'تقبّل الله طاعتكم!',
+      'fr': 'Qu’Allah accepte vos adorations !',
+    },
+    'completion_prayer_subtitle': {
+      'ar': 'تقبّل الله صلاتك وذكرك',
+      'fr': 'Qu’Allah accepte votre prière et vos invocations',
+    },
+    'completion_general_subtitle': {
+      'ar': 'لقد أتممت جميع الأذكار بنجاح',
+      'fr': 'Vous avez complété l’ensemble des invocations avec succès',
+    },
+    'no_adhkar_found': {
+      'ar': 'لا توجد أذكار متاحة',
+      'fr': 'Aucune invocation disponible',
+    },
+    'required_count': {
+      'ar': 'العدد المطلوب: {count}',
+      'fr': 'Nombre requis : {count}',
+    },
+    'tap_to_count': {
+      'ar': 'اضغط',
+      'fr': 'Toucher',
+    },
+
+    // ── Share Modal ──
+    'share_modal_title': {
+      'ar': 'مشاركة تطبيق أذكار غزة 🤲',
+      'fr': 'Partager l’application Adhkar Gaza 🤲',
+    },
+    'share_modal_desc': {
+      'ar': 'ساهم في نشر الأذكار والدعاء لأهلنا في غزة والعالم الإسلامي',
+      'fr': 'Partagez les invocations quotidiennes et le soutien spirituel pour Gaza et la communauté',
+    },
+    'share_copy_link': {
+      'ar': 'نسخ رابط التطبيق',
+      'fr': 'Copier le lien du site',
+    },
+    'share_copied_success': {
+      'ar': 'تم نسخ رابط التطبيق بنجاح 📋',
+      'fr': 'Lien de l’application copié avec succès ! 📋',
+    },
+
+    // ── Home & Onboarding ──
+    'start_streak_today': {
+      'ar': 'ابدأ سلسلتك المباركة اليوم',
+      'fr': 'Démarrez votre série quotidienne aujourd’hui',
+    },
     'version': {
       'ar': 'أذكار غزة — الإصدار 1.0',
       'fr': 'Adhkar Gaza — Version 1.0',

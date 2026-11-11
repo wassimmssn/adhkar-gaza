@@ -488,6 +488,7 @@ class _ShareGlassSheet extends StatelessWidget {
     final primaryColor = isDark
         ? const Color(0xFF2DD4BF)
         : const Color(0xFF115E54);
+    final lang = Provider.of<SettingsProvider>(context, listen: false).language;
 
     return Container(
       margin: const EdgeInsets.all(16),
@@ -531,7 +532,7 @@ class _ShareGlassSheet extends StatelessWidget {
           ),
           const SizedBox(height: 14),
           Text(
-            'مشاركة تطبيق أذكار غزة 🤲',
+            AppStrings.get('share_modal_title', lang),
             style: TextStyle(
               fontFamily: 'Cairo',
               fontSize: 20,
@@ -541,7 +542,7 @@ class _ShareGlassSheet extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'ساهم في نشر الأذكار والدعاء لأهلنا في غزة والعالم الإسلامي',
+            AppStrings.get('share_modal_desc', lang),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: 'Cairo',
@@ -563,9 +564,9 @@ class _ShareGlassSheet extends StatelessWidget {
               elevation: 2,
             ),
             icon: const Icon(Icons.copy_rounded, color: Colors.white),
-            label: const Text(
-              'نسخ رابط التطبيق',
-              style: TextStyle(
+            label: Text(
+              AppStrings.get('share_copy_link', lang),
+              style: const TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -578,9 +579,9 @@ class _ShareGlassSheet extends StatelessWidget {
               );
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('تم نسخ رابط التطبيق بنجاح 📋'),
-                  duration: Duration(seconds: 2),
+                SnackBar(
+                  content: Text(AppStrings.get('share_copied_success', lang)),
+                  duration: const Duration(seconds: 2),
                 ),
               );
             },

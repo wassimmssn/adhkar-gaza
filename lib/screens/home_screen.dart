@@ -1287,8 +1287,10 @@ class _StreakSummaryCard extends StatelessWidget {
                           ),
                           Text(
                             streak > 0
-                                ? 'سلسلة متتالية: $streak ${streak == 1 ? "يوم" : "أيام"}'
-                                : 'ابدأ سلسلتك المباركة اليوم',
+                                ? (lang == 'fr'
+                                    ? 'Série consécutive : $streak jour${streak > 1 ? "s" : ""}'
+                                    : 'سلسلة متتالية: $streak ${streak == 1 ? "يوم" : "أيام"}')
+                                : AppStrings.get('start_streak_today', lang),
                             style: TextStyle(
                               fontFamily: 'Cairo',
                               fontSize: 12,
@@ -1523,7 +1525,9 @@ class _LanguageOnboardingDialogState extends State<_LanguageOnboardingDialog> {
             ),
             const SizedBox(height: 14),
             Text(
-              'اختر طريقة العرض المفضلة لديك لقراءة الأذكار\n(يمكنك تغييرها دائماً من الإعدادات) :',
+              _selectedLanguage == 'fr'
+                  ? 'Choisissez votre mode d’affichage préféré\n(modifiable à tout moment dans les paramètres) :'
+                  : 'اختر طريقة العرض المفضلة لديك لقراءة الأذكار\n(يمكنك تغييرها دائماً من الإعدادات) :',
               style: theme.textTheme.bodySmall?.copyWith(
                 height: 1.5,
                 fontSize: 12.5,

@@ -30,7 +30,7 @@ class AdhkarScreen extends StatelessWidget {
               if (provider.canUndo && !provider.isCompleted)
                 IconButton(
                   icon: const Icon(Icons.undo_rounded),
-                  tooltip: 'تراجع',
+                  tooltip: AppStrings.get('undo', Provider.of<SettingsProvider>(context, listen: false).language),
                   onPressed: () {
                     provider.undo();
                     try {
@@ -49,7 +49,7 @@ class AdhkarScreen extends StatelessWidget {
               if (provider.adhkarList.isEmpty) {
                 return Center(
                   child: Text(
-                    'لا توجد أذكار',
+                    AppStrings.get('no_adhkar_found', Provider.of<SettingsProvider>(context, listen: false).language),
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                 );
@@ -372,7 +372,7 @@ class _DhikrViewState extends State<_DhikrView>
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'العدد المطلوب: ${dhikr.count}',
+                      AppStrings.get('required_count', settingsProvider.language, {'count': '${dhikr.count}'}),
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 12,
@@ -759,6 +759,7 @@ class _TasbihButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+    final isFrench = Provider.of<SettingsProvider>(context, listen: false).isFrench;
 
     return GestureDetector(
       onTap: onTap,
@@ -800,7 +801,7 @@ class _TasbihButton extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'اضغط',
+              isFrench ? 'Toucher' : 'اضغط',
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 16,
@@ -985,20 +986,21 @@ class _CompletionViewState extends State<_CompletionView>
     final isDark = theme.brightness == Brightness.dark;
     final primaryColor = theme.colorScheme.primary;
 
+    final lang = Provider.of<SettingsProvider>(context).language;
     final isAfterPrayer = widget.provider.currentCategory.startsWith('after_') ||
         widget.provider.currentCategory == 'after_prayer';
 
     final quoteAttribution = isAfterPrayer
-        ? 'وصية النبي ﷺ لمعاذ بن جبل رضي الله عنه'
-        : 'قال الإمام ابن القيم رحمه الله';
+        ? AppStrings.get('completion_hadith_title', lang)
+        : AppStrings.get('completion_quote_title', lang);
 
     final quoteText = isAfterPrayer
-        ? '«يَا مُعَاذُ، وَاللَّهِ إِنِّي لَأُحِبُّكَ، فَلَا تَدَعَنَّ فِي دُبُرِ كُلِّ صَلَاةٍ أَنْ تَقُولَ: اللَّهُمَّ أَعِنِّي عَلَى ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ»'
-        : 'أذكار الصباح والمساء بمثابة الدرع، كلما زادت سماكته لم يتأثر صاحبه، بل تصل قوة الدرع أن يعود السهم فيصيب من أطلقه.';
+        ? AppStrings.get('completion_hadith_text', lang)
+        : AppStrings.get('completion_quote_text', lang);
 
     final completionSubtitle = isAfterPrayer
-        ? 'تقبّل الله صلاتك وذكرك'
-        : 'لقد أتممت جميع الأذكار';
+        ? AppStrings.get('completion_prayer_subtitle', lang)
+        : AppStrings.get('completion_general_subtitle', lang);
 
     return FadeTransition(
       opacity: _fadeAnimation,
@@ -1062,7 +1064,7 @@ class _CompletionViewState extends State<_CompletionView>
                           end: Alignment.bottomLeft,
                         ).createShader(bounds),
                         child: Text(
-                          isAfterPrayer ? 'تقبّل الله طاعتكم!' : 'بارك الله فيك!',
+                          isAfterPrayer ? AppStrings.get('completion_prayer_title', lang) : AppStrings.get('completed_title', lang),
                           style: theme.textTheme.displayLarge?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.w900,
@@ -1221,7 +1223,7 @@ class _CompletionViewState extends State<_CompletionView>
                           Expanded(
                             child: _ActionButton(
                               icon: Icons.home_rounded,
-                              label: 'الرئيسية',
+                              label: AppStrings.get('back_home', lang),
                               isPrimary: false,
                               primaryColor: primaryColor,
                               isDark: isDark,
@@ -1236,7 +1238,7 @@ class _CompletionViewState extends State<_CompletionView>
                           Expanded(
                             child: _ActionButton(
                               icon: Icons.refresh_rounded,
-                              label: 'إعادة',
+                              label: AppStrings.get('repeat', lang),
                               isPrimary: true,
                               primaryColor: primaryColor,
                               isDark: isDark,

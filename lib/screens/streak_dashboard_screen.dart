@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/daily_tracker.dart';
 import '../providers/streak_provider.dart';
+import '../providers/settings_provider.dart';
+import '../l10n/app_strings.dart';
 import '../services/streak_service.dart';
 import '../widgets/glass_widgets.dart';
 
@@ -44,11 +46,13 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
     final primaryColor = theme.colorScheme.primary;
     final secondaryColor = theme.colorScheme.secondary;
 
+    final lang = Provider.of<SettingsProvider>(context).language;
+
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
-      appBar: const GlassAppBar(
-        title: 'سجل الالتزام',
+      appBar: GlassAppBar(
+        title: AppStrings.get('sijil_title', lang),
         showBackButton: true,
         scrollOffset: 50,
       ),
@@ -120,7 +124,7 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
                     ),
                     const SizedBox(height: 12),
                     Text(
-                      'سجل المداومة على الأذكار',
+                      AppStrings.get('sijil_subtitle', lang),
                       style: theme.textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.w800,
                         color: isDark ? Colors.white : const Color(0xFF0F172A),
@@ -129,7 +133,7 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
                     ),
                     const SizedBox(height: 6),
                     Text(
-                      '«أَحَبُّ الأَعْمَالِ إِلَى اللَّهِ أَدْوَمُهَا وَإِنْ قَلَّ»',
+                      AppStrings.get('sijil_hadith', lang),
                       style: TextStyle(
                         fontFamily: 'Amiri',
                         fontSize: 16,
@@ -154,8 +158,8 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
                       icon: Icons.local_fire_department_rounded,
                       iconColor: const Color(0xFFF97316),
                       value: '$currentStreak',
-                      unit: 'أيام',
-                      title: 'السلسلة الحالية',
+                      unit: AppStrings.get('sijil_unit_days', lang),
+                      title: AppStrings.get('sijil_current_streak', lang),
                       isDark: isDark,
                       primaryColor: primaryColor,
                     ),
@@ -166,8 +170,8 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
                       icon: Icons.emoji_events_rounded,
                       iconColor: const Color(0xFFEAB308),
                       value: '$bestStreak',
-                      unit: 'أيام',
-                      title: 'أفضل التزام',
+                      unit: AppStrings.get('sijil_unit_days', lang),
+                      title: AppStrings.get('sijil_best_streak', lang),
                       isDark: isDark,
                       primaryColor: primaryColor,
                     ),
@@ -178,8 +182,8 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
                       icon: Icons.check_circle_rounded,
                       iconColor: const Color(0xFF10B981),
                       value: '$totalSessions',
-                      unit: 'وِردًا',
-                      title: 'إجمالي الأوراد',
+                      unit: AppStrings.get('sijil_unit_sessions', lang),
+                      title: AppStrings.get('sijil_total_sessions', lang),
                       isDark: isDark,
                       primaryColor: primaryColor,
                     ),
@@ -193,7 +197,7 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
               //  TODAY'S COMMITMENT CHECKLIST
               // ═════════════════════════════════════════
               Text(
-                'أوراد اليوم',
+                AppStrings.get('sijil_today_adhkar', lang),
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w800,
                 ),
@@ -204,6 +208,7 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
                 isDark: isDark,
                 primaryColor: primaryColor,
                 secondaryColor: secondaryColor,
+                lang: lang,
               ),
 
               const SizedBox(height: 28),
@@ -215,7 +220,7 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'تقويم الالتزام',
+                    AppStrings.get('sijil_calendar', lang),
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
@@ -240,7 +245,7 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          '${_getArabicMonthName(_selectedMonth.month)} ${_selectedMonth.year}',
+                          '${_getMonthName(_selectedMonth.month, lang)} ${_selectedMonth.year}',
                           style: TextStyle(
                             fontFamily: 'Cairo',
                             fontSize: 13,
@@ -266,7 +271,7 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
                 data: streakProvider.data,
                 isDark: isDark,
                 primaryColor: primaryColor,
-                onDayTapped: (date, entry) => _showDayDetails(context, date, entry),
+                onDayTapped: (date, entry) => _showDayDetails(context, date, entry, lang),
               ),
 
               const SizedBox(height: 28),
@@ -297,7 +302,7 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'فضل المداومة على الذكر',
+                            AppStrings.get('sijil_wisdom_title', lang),
                             style: TextStyle(
                               fontFamily: 'Cairo',
                               fontWeight: FontWeight.w700,
@@ -307,7 +312,7 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'قال الإمام النووي رحمه الله: ينبغي لمن كان له وظيفة من الذكر في وقت من ليل أو نهار أو عقب صلاة أو حال من الأحوال ففاتته، أن يتداركها ويأتي بها إذا تمكن منها ولا يهملها، فإنه إذا اعتاد ملازمتها لم يعرضها للتفويت.',
+                            AppStrings.get('sijil_wisdom_text', lang),
                             style: TextStyle(
                               fontFamily: 'Amiri',
                               fontSize: 15,
@@ -333,25 +338,11 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
     return date.year == now.year && date.month == now.month;
   }
 
-  String _getArabicMonthName(int month) {
-    const months = [
-      'يناير',
-      'فبراير',
-      'مارس',
-      'أبريل',
-      'مايو',
-      'يونيو',
-      'يوليو',
-      'أغسطس',
-      'سبتمبر',
-      'أكتوبر',
-      'نوفمبر',
-      'ديسمبر',
-    ];
-    return months[month - 1];
+  String _getMonthName(int month, String lang) {
+    return AppStrings.get('month_$month', lang);
   }
 
-  void _showDayDetails(BuildContext context, DateTime date, DayCompletion? entry) {
+  void _showDayDetails(BuildContext context, DateTime date, DayCompletion? entry, String lang) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).colorScheme.primary;
 
@@ -375,12 +366,18 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'تفاصيل يوم ${date.day} ${_getArabicMonthName(date.month)} ${date.year}',
-                    style: const TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
+                  Expanded(
+                    child: Text(
+                      AppStrings.get('sijil_day_details', lang, {
+                        'day': '${date.day}',
+                        'month': _getMonthName(date.month, lang),
+                        'year': '${date.year}',
+                      }),
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -395,7 +392,7 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Center(
                     child: Text(
-                      'لم يتم تسجيل أوراد في هذا اليوم',
+                      AppStrings.get('sijil_no_activity', lang),
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         color: isDark ? Colors.white60 : Colors.black54,
@@ -405,27 +402,27 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
                 )
               else ...[
                 _DayDetailRow(
-                  title: 'أذكار الصباح',
+                  title: AppStrings.get('morning_title', lang),
                   isCompleted: entry.morning,
                   icon: Icons.wb_sunny_rounded,
                   color: const Color(0xFFF59E0B),
                 ),
                 const SizedBox(height: 10),
                 _DayDetailRow(
-                  title: 'أذكار المساء',
+                  title: AppStrings.get('evening_title', lang),
                   isCompleted: entry.evening,
                   icon: Icons.nightlight_round,
                   color: const Color(0xFF8B5CF6),
                 ),
                 const SizedBox(height: 10),
                 _DayDetailRow(
-                  title: 'أذكار الصلوات (${entry.prayers.length}/5)',
+                  title: AppStrings.get('sijil_prayers_count', lang, {'count': '${entry.prayers.length}'}),
                   isCompleted: entry.prayers.isNotEmpty,
                   subtitle: entry.prayers.isEmpty
-                      ? 'لم تسجل'
+                      ? AppStrings.get('sijil_not_recorded', lang)
                       : entry.prayers
-                          .map((p) => _getPrayerArabicName(p))
-                          .join('، '),
+                          .map((p) => _getPrayerLocalizedName(p, lang))
+                          .join(', '),
                   icon: Icons.mosque_rounded,
                   color: const Color(0xFF10B981),
                 ),
@@ -438,21 +435,8 @@ class _StreakDashboardScreenState extends State<StreakDashboardScreen> {
     );
   }
 
-  String _getPrayerArabicName(String id) {
-    switch (id) {
-      case 'fajr':
-        return 'الفجر';
-      case 'dhuhr':
-        return 'الظهر';
-      case 'asr':
-        return 'العصر';
-      case 'maghrib':
-        return 'المغرب';
-      case 'isha':
-        return 'العشاء';
-      default:
-        return id;
-    }
+  String _getPrayerLocalizedName(String id, String lang) {
+    return AppStrings.get('prayer_${id}_name', lang);
   }
 }
 
@@ -552,12 +536,14 @@ class _TodayChecklistCard extends StatelessWidget {
   final bool isDark;
   final Color primaryColor;
   final Color secondaryColor;
+  final String lang;
 
   const _TodayChecklistCard({
     required this.todayData,
     required this.isDark,
     required this.primaryColor,
     required this.secondaryColor,
+    required this.lang,
   });
 
   @override
@@ -583,19 +569,21 @@ class _TodayChecklistCard extends StatelessWidget {
       child: Column(
         children: [
           _ChecklistItem(
-            title: 'أذكار الصباح',
+            title: AppStrings.get('morning_title', lang),
             isDone: todayData.morning,
             icon: Icons.wb_sunny_rounded,
             color: const Color(0xFFF59E0B),
             isDark: isDark,
+            lang: lang,
           ),
           const Divider(height: 20),
           _ChecklistItem(
-            title: 'أذكار المساء',
+            title: AppStrings.get('evening_title', lang),
             isDone: todayData.evening,
             icon: Icons.nightlight_round,
             color: const Color(0xFF8B5CF6),
             isDark: isDark,
+            lang: lang,
           ),
           const Divider(height: 20),
           Column(
@@ -619,9 +607,9 @@ class _TodayChecklistCard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      const Text(
-                        'أذكار بعد الصلوات',
-                        style: TextStyle(
+                      Text(
+                        AppStrings.get('sijil_after_prayers', lang),
+                        style: const TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -636,7 +624,7 @@ class _TodayChecklistCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      '${todayData.prayers.length}/5 صلوات',
+                      AppStrings.get('sijil_prayers_ratio', lang, {'count': '${todayData.prayers.length}'}),
                       style: const TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 12,
@@ -651,11 +639,11 @@ class _TodayChecklistCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _PrayerChip(name: 'الفجر', isDone: todayData.prayers.contains('fajr'), isDark: isDark),
-                  _PrayerChip(name: 'الظهر', isDone: todayData.prayers.contains('dhuhr'), isDark: isDark),
-                  _PrayerChip(name: 'العصر', isDone: todayData.prayers.contains('asr'), isDark: isDark),
-                  _PrayerChip(name: 'المغرب', isDone: todayData.prayers.contains('maghrib'), isDark: isDark),
-                  _PrayerChip(name: 'العشاء', isDone: todayData.prayers.contains('isha'), isDark: isDark),
+                  _PrayerChip(name: AppStrings.get('prayer_fajr_name', lang), isDone: todayData.prayers.contains('fajr'), isDark: isDark),
+                  _PrayerChip(name: AppStrings.get('prayer_dhuhr_name', lang), isDone: todayData.prayers.contains('dhuhr'), isDark: isDark),
+                  _PrayerChip(name: AppStrings.get('prayer_asr_name', lang), isDone: todayData.prayers.contains('asr'), isDark: isDark),
+                  _PrayerChip(name: AppStrings.get('prayer_maghrib_name', lang), isDone: todayData.prayers.contains('maghrib'), isDark: isDark),
+                  _PrayerChip(name: AppStrings.get('prayer_isha_name', lang), isDone: todayData.prayers.contains('isha'), isDark: isDark),
                 ],
               ),
             ],
@@ -672,6 +660,7 @@ class _ChecklistItem extends StatelessWidget {
   final IconData icon;
   final Color color;
   final bool isDark;
+  final String lang;
 
   const _ChecklistItem({
     required this.title,
@@ -679,6 +668,7 @@ class _ChecklistItem extends StatelessWidget {
     required this.icon,
     required this.color,
     required this.isDark,
+    required this.lang,
   });
 
   @override
@@ -732,7 +722,7 @@ class _ChecklistItem extends StatelessWidget {
               ),
               const SizedBox(width: 5),
               Text(
-                isDone ? 'تم بحمد الله' : 'في الانتظار',
+                isDone ? AppStrings.get('sijil_completed', lang) : AppStrings.get('sijil_pending', lang),
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: 11.5,
@@ -825,7 +815,8 @@ class _MonthCalendarCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const weekDays = ['أحد', 'إثن', 'ثلا', 'أرب', 'خمي', 'جمع', 'سبت'];
+    final lang = Provider.of<SettingsProvider>(context).language;
+    final weekDays = List.generate(7, (i) => AppStrings.get('weekday_$i', lang));
 
     final firstDayOfMonth = DateTime(month.year, month.month, 1);
     final daysInMonth = DateTime(month.year, month.month + 1, 0).day;

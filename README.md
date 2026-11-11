@@ -20,13 +20,17 @@
 
 ## ✨ Features
 
-- 📖 **Comprehensive Adhkar Library**: Morning, Evening, After Prayer, Sleep, and dedicated supplications for Gaza and Palestine.
-- ⚡ **Offline-First PWA Architecture**: Operates completely offline without an internet connection using a dedicated, high-performance custom Service Worker.
-- 🔥 **Daily Streak & Habit Tracker**: Visual calendar dashboard tracking your consistency, streaks, and completed daily remembrance goals.
+- 🌐 **Full Bilingual Support (French & Arabic)**: Seamless language switching across all screens (Home, Invocations, Prayers, Sijil tracker, Settings, and Dialogs).
+- 🔤 **Phonetic Latin Transliteration**: Clear pronunciation aid in Latin script beneath every Dhikr, designed for learners and non-Arabic speakers.
+- 🔊 **Voice Audio Recitation**: Natural pronunciation audio for each Dhikr with independent toggles in Settings and on cards.
+- 🚀 **First-Launch Onboarding**: Guided modal on first open allowing users to immediately configure their preferred language and assistance options.
+- 📖 **Authentic Adhkar Library**: Morning, Evening, After Prayer (5 daily prayers), and dedicated supplications for Gaza and Palestine.
+- ⚡ **Offline-First PWA Architecture**: Operates completely offline without an internet connection via a custom Service Worker and local Cache API.
+- 🔥 **Daily Streak & Habit Tracker (Sijil al-Moudawama)**: Interactive calendar and consistency dashboard tracking consecutive days and daily completed sessions.
 - 🔔 **Smart Web Push Notifications**: Cloudflare Workers background cron engine sending prayer and remembrance reminders with VAPID web-push encryption.
-- 🎨 **Glassmorphic Islamic Aesthetics**: Custom-crafted UI with responsive Dark & Light themes, fluid animations, and typography powered by Arabic Google Fonts (*Cairo* & *Amiri*).
+- 🎨 **Glassmorphic Islamic Aesthetics**: Responsive Dark & Light themes, fluid animations, and sacred Arabic typography (*Amiri* & *Cairo*).
 - 📳 **Interactive Counter & Feedback**: Single-tap count incrementation, milestone completions, haptic feedback, and auto-progression.
-- 📱 **Installable Anywhere**: Install directly onto iOS, Android, macOS, or Windows as a standalone application right from the browser.
+- 📱 **Installable Anywhere**: Install directly onto iOS, Android, macOS, or Windows as a standalone PWA right from the browser.
 
 ---
 
