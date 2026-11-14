@@ -7,6 +7,7 @@ import 'providers/streak_provider.dart';
 import 'providers/theme_provider.dart';
 import 'screens/home_screen.dart';
 import 'services/audio_service.dart';
+import 'services/auth_service.dart';
 import 'services/pwa_install_service.dart';
 import 'services/notification_service.dart';
 import 'theme/app_theme.dart';
@@ -19,6 +20,7 @@ void main() {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => StreakProvider()),
+        ChangeNotifierProvider(create: (_) => AuthService()..init()),
         ChangeNotifierProvider(create: (_) => AudioService()),
         ChangeNotifierProvider(create: (_) => PwaInstallService()),
         ChangeNotifierProvider(create: (_) => NotificationService()..init()),

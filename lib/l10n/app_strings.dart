@@ -570,6 +570,80 @@ class AppStrings {
       'ar': 'ابدأ سلسلتك المباركة اليوم',
       'fr': 'Démarrez votre série quotidienne aujourd’hui',
     },
+
+    // ── Account & Cloud Auth ──
+    'account_section': {
+      'ar': 'الحساب والمزامنة السحابية',
+      'fr': 'Compte & Synchronisation Cloud',
+    },
+    'account_guest_title': {
+      'ar': 'وضع الضيف (حساب محلي)',
+      'fr': 'Compte Invité (stockage local)',
+    },
+    'account_guest_desc': {
+      'ar': 'سجّل الدخول بحساب Google لحفظ وتزامن أورادك وإعداداتك عبر جميع أجهزتك',
+      'fr': 'Connectez-vous avec Google pour sauvegarder et synchroniser vos séries et préférences',
+    },
+    'btn_google_signin': {
+      'ar': 'متابعة باستخدام Google',
+      'fr': 'Se connecter avec Google',
+    },
+    'btn_sync_now': {
+      'ar': 'مزامنة سحابية الآن',
+      'fr': 'Synchroniser avec le Cloud',
+    },
+    'btn_signout': {
+      'ar': 'تسجيل الخروج',
+      'fr': 'Se déconnecter',
+    },
+    'sync_status_synced': {
+      'ar': 'آخر مزامنة: {time}',
+      'fr': 'Dernière synchro : {time}',
+    },
+    'sync_status_in_progress': {
+      'ar': 'جاري المزامنة السحابية...',
+      'fr': 'Synchronisation en cours...',
+    },
+    'sync_just_now': {
+      'ar': 'الآن',
+      'fr': 'À l’instant',
+    },
+    'profile_title': {
+      'ar': 'الملف الشخصي',
+      'fr': 'Profil Utilisateur',
+    },
+    'dialog_google_title': {
+      'ar': 'تسجيل الدخول بـ Google',
+      'fr': 'Connexion Google 1-Clic',
+    },
+    'dialog_google_subtitle': {
+      'ar': 'أدخل معلومات حسابك لحفظ تقدمك ومزامنته سحابياً',
+      'fr': 'Associez votre compte pour sauvegarder vos séries d’invocations',
+    },
+    'dialog_google_email_hint': {
+      'ar': 'عنوان Gmail',
+      'fr': 'Adresse Gmail',
+    },
+    'dialog_google_name_hint': {
+      'ar': 'الاسم الكريم',
+      'fr': 'Nom complet',
+    },
+    'dialog_google_confirm': {
+      'ar': 'دخول ومزامنة',
+      'fr': 'Se connecter',
+    },
+    'dialog_google_cancel': {
+      'ar': 'إلغاء',
+      'fr': 'Annuler',
+    },
+    'sync_success_toast': {
+      'ar': 'تمت المزامنة السحابية بنجاح ☁️',
+      'fr': 'Synchronisation cloud réussie ☁️',
+    },
+    'signout_confirm_toast': {
+      'ar': 'تم تسجيل الخروج بنجاح',
+      'fr': 'Déconnexion effectuée',
+    },
     'version': {
       'ar': 'أذكار غزة — الإصدار 1.0',
       'fr': 'Adhkar Gaza — Version 1.0',

@@ -84,4 +84,32 @@ class StreakProvider extends ChangeNotifier {
     notifyListeners();
     await StreakService.saveAllData(_data);
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'data': _data.map((key, val) => MapEntry(key, val.toJson())),
+      'bestStreak': _bestStreak,
+    };
+  }
+
+  Future<void> loadFromJson(Map<String, dynamic> json) async {
+    if (json['data'] != null && json['data'] is Map) {
+      final rawData = json['data'] as Map;
+      final Map<String, DayCompletion> imported = {};
+      rawData.forEach((k, v) {
+        if (v is Map) {
+          imported[k.toString()] = DayCompletion.fromJson(Map<String, dynamic>.from(v));
+        }
+      });
+      _data = imported;
+      await StreakService.saveAllData(_data);
+    }
+    if (json['bestStreak'] != null) {
+      _bestStreak = json['bestStreak'] as int? ?? _bestStreak;
+      await StreakService.saveBestStreak(_bestStreak);
+    }
+    _currentStreak = StreakService.calculateCurrentStreak(_data, DateTime.now());
+    _totalSessions = StreakService.calculateTotalCompletedSessions(_data);
+    notifyListeners();
+  }
 }

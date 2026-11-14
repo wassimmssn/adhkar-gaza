@@ -4,6 +4,8 @@ import '../providers/adhkar_provider.dart';
 import '../providers/settings_provider.dart';
 import '../providers/streak_provider.dart';
 import '../services/pwa_install_service.dart';
+import '../services/auth_service.dart';
+import '../widgets/auth_dialog.dart';
 import 'adhkar_screen.dart';
 import 'prayer_selection_screen.dart';
 import 'streak_dashboard_screen.dart';
@@ -181,7 +183,59 @@ class _HomeScreenState extends State<HomeScreen>
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
-      appBar: GlassAppBar(title: AppStrings.get('app_title', lang), scrollOffset: _scrollOffset),
+      appBar: GlassAppBar(
+        title: AppStrings.get('app_title', lang),
+        scrollOffset: _scrollOffset,
+        actions: [
+          Consumer<AuthService>(
+            builder: (context, authService, _) {
+              final user = authService.currentUser;
+              final isLoggedIn = authService.isLoggedIn;
+              final primaryColor = theme.colorScheme.primary;
+
+              return Padding(
+                padding: const EdgeInsetsDirectional.only(end: 12),
+                child: InkWell(
+                  onTap: () {
+                    if (isLoggedIn) {
+                      showUserProfileSheet(context);
+                    } else {
+                      showGoogleSignInDialog(context);
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: primaryColor.withValues(alpha: 0.3),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: primaryColor.withValues(
+                        alpha: isDark ? 0.2 : 0.1,
+                      ),
+                      backgroundImage: isLoggedIn && user?.photoUrl != null
+                          ? NetworkImage(user!.photoUrl!)
+                          : null,
+                      child: !isLoggedIn || user?.photoUrl == null
+                          ? Icon(
+                              isLoggedIn ? Icons.person_rounded : Icons.person_outline_rounded,
+                              size: 18,
+                              color: primaryColor,
+                            )
+                          : null,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
       bottomNavigationBar: const FloatingGlassDock(activeIndex: 0),
       body: Stack(
         children: [
@@ -1129,10 +1183,13 @@ class _CategoryCardState extends State<_CategoryCard>
                           color: Colors.white.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(14),
                         ),
-                        child: const Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          color: Colors.white,
-                          size: 16,
+                        child: Transform.scale(
+                          scaleX: Directionality.of(context) == TextDirection.rtl ? -1 : 1,
+                          child: const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            color: Colors.white,
+                            size: 16,
+                          ),
                         ),
                       ),
                     ],
@@ -1332,10 +1389,13 @@ class _StreakSummaryCard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 4),
-                          Icon(
-                            Icons.arrow_forward_ios_rounded,
-                            size: 11,
-                            color: primaryColor,
+                          Transform.scale(
+                            scaleX: Directionality.of(context) == TextDirection.rtl ? -1 : 1,
+                            child: Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              size: 11,
+                              color: primaryColor,
+                            ),
                           ),
                         ],
                       ),
@@ -1661,10 +1721,10 @@ class _LanguageOnboardingDialogState extends State<_LanguageOnboardingDialog> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    const Text(
                       'ابدأ الآن — Commencer',
                       style: TextStyle(
                         fontFamily: 'Cairo',
@@ -1672,8 +1732,11 @@ class _LanguageOnboardingDialogState extends State<_LanguageOnboardingDialog> {
                         fontSize: 15,
                       ),
                     ),
-                    SizedBox(width: 8),
-                    Icon(Icons.arrow_forward_rounded, size: 18),
+                    const SizedBox(width: 8),
+                    Transform.scale(
+                      scaleX: Directionality.of(context) == TextDirection.rtl ? -1 : 1,
+                      child: const Icon(Icons.arrow_forward_rounded, size: 18),
+                    ),
                   ],
                 ),
               ),

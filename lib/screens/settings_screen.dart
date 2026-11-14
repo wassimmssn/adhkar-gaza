@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/settings_provider.dart';
+import '../providers/streak_provider.dart';
 import '../providers/theme_provider.dart';
+import '../services/auth_service.dart';
 import '../services/notification_service.dart';
 import '../l10n/app_strings.dart';
+import '../widgets/auth_dialog.dart';
 import '../widgets/glass_widgets.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -34,6 +37,135 @@ class SettingsScreen extends StatelessWidget {
           bottom: 100,
         ),
         children: [
+          // ═════════════════════════════════════════════
+          //  ACCOUNT & CLOUD AUTH SECTION
+          // ═════════════════════════════════════════════
+          _SectionHeader(
+            icon: Icons.account_circle_outlined,
+            title: AppStrings.get('account_section', lang),
+            theme: theme,
+          ),
+          const SizedBox(height: 12),
+          Consumer<AuthService>(
+            builder: (context, authService, _) {
+              final user = authService.currentUser;
+              final isLoggedIn = authService.isLoggedIn;
+
+              return _GlassCard(
+                theme: theme,
+                isDark: isDark,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        CircleAvatar(
+                          radius: 24,
+                          backgroundColor: theme.colorScheme.primary.withValues(alpha: isDark ? 0.2 : 0.1),
+                          backgroundImage: isLoggedIn && user?.photoUrl != null
+                              ? NetworkImage(user!.photoUrl!)
+                              : null,
+                          child: !isLoggedIn || user?.photoUrl == null
+                              ? Icon(
+                                  isLoggedIn ? Icons.person_rounded : Icons.person_outline_rounded,
+                                  color: theme.colorScheme.primary,
+                                  size: 26,
+                                )
+                              : null,
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                isLoggedIn
+                                    ? user!.displayName
+                                    : AppStrings.get('account_guest_title', lang),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                isLoggedIn
+                                    ? user!.email
+                                    : AppStrings.get('account_guest_desc', lang),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Divider(height: 1, thickness: 0.5),
+                    const SizedBox(height: 14),
+                    if (!isLoggedIn)
+                      SizedBox(
+                        width: double.infinity,
+                        height: 46,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: theme.colorScheme.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          icon: const GoogleLogoWidget(size: 18),
+                          label: Text(
+                            AppStrings.get('btn_google_signin', lang),
+                            style: const TextStyle(
+                              fontFamily: 'Cairo',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                            ),
+                          ),
+                          onPressed: () => showGoogleSignInDialog(context),
+                        ),
+                      )
+                    else
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          TextButton.icon(
+                            onPressed: () async {
+                              await authService.syncToCloud(
+                                settingsData: settingsProvider.toJson(),
+                                streakData: Provider.of<StreakProvider>(context, listen: false).toJson(),
+                              );
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(AppStrings.get('sync_success_toast', lang)),
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            },
+                            icon: const Icon(Icons.cloud_upload_rounded, size: 18),
+                            label: Text(
+                              AppStrings.get('btn_sync_now', lang),
+                              style: const TextStyle(fontFamily: 'Cairo', fontSize: 13),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.manage_accounts_rounded),
+                            tooltip: AppStrings.get('profile_title', lang),
+                            onPressed: () => showUserProfileSheet(context),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 28),
+
           // ═════════════════════════════════════════════
           //  APPEARANCE SECTION
           // ═════════════════════════════════════════════

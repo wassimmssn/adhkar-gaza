@@ -220,7 +220,10 @@ class GlassAppBar extends StatelessWidget implements PreferredSizeWidget {
                         leading ??
                         (showBackButton && Navigator.canPop(context)
                             ? IconButton(
-                                icon: const Icon(Icons.arrow_back_rounded),
+                                icon: Transform.scale(
+                                  scaleX: Directionality.of(context) == TextDirection.rtl ? -1 : 1,
+                                  child: const Icon(Icons.arrow_back_rounded),
+                                ),
                                 onPressed: () => Navigator.pop(context),
                               )
                             : null),

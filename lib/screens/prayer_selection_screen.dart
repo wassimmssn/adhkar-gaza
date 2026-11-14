@@ -493,10 +493,13 @@ class _PrayerCardState extends State<_PrayerCard>
                             alpha: isDark ? 0.15 : 0.10,
                           ),
                         ),
-                        child: Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          color: prayer.gradientColors[0],
-                          size: 16,
+                        child: Transform.scale(
+                          scaleX: Directionality.of(context) == TextDirection.rtl ? -1 : 1,
+                          child: Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            color: prayer.gradientColors[0],
+                            size: 16,
+                          ),
                         ),
                       ),
                     ],

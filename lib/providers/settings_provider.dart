@@ -70,6 +70,34 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Map<String, dynamic> toJson() => {
+        _tapToConfirmKey: _tapToConfirm,
+        _showPhoneticKey: _showPhonetic,
+        _showAudioKey: _showAudio,
+        _appLanguageKey: _language,
+        _hasCompletedOnboardingKey: _hasCompletedOnboarding,
+      };
+
+  void loadFromJson(Map<String, dynamic> json) {
+    if (json.containsKey(_tapToConfirmKey)) {
+      _tapToConfirm = json[_tapToConfirmKey] as bool? ?? true;
+    }
+    if (json.containsKey(_showPhoneticKey)) {
+      _showPhonetic = json[_showPhoneticKey] as bool? ?? false;
+    }
+    if (json.containsKey(_showAudioKey)) {
+      _showAudio = json[_showAudioKey] as bool? ?? true;
+    }
+    if (json.containsKey(_appLanguageKey)) {
+      _language = json[_appLanguageKey] as String? ?? 'ar';
+    }
+    if (json.containsKey(_hasCompletedOnboardingKey)) {
+      _hasCompletedOnboarding = json[_hasCompletedOnboardingKey] as bool? ?? false;
+    }
+    _saveToPrefs();
+    notifyListeners();
+  }
+
   Future<void> _loadFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     _tapToConfirm = prefs.getBool(_tapToConfirmKey) ?? true;

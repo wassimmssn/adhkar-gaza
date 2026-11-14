@@ -312,6 +312,40 @@ export default {
     // Route
     const path = url.pathname;
 
+    if (path === '/api/user/sync' && request.method === 'POST') {
+      try {
+        const body = await request.json();
+        const { email, profile, settings, streakData } = body;
+        if (!email) return jsonResponse({ error: 'Email required' }, 400, origin, env.ALLOWED_ORIGIN);
+
+        const userKey = `user:${email.toLowerCase().trim()}`;
+        const userData = {
+          profile,
+          settings,
+          streakData,
+          updatedAt: new Date().toISOString(),
+        };
+        await env.PUSH_SUBSCRIPTIONS.put(userKey, JSON.stringify(userData));
+        return jsonResponse({ success: true, updatedAt: userData.updatedAt }, 200, origin, env.ALLOWED_ORIGIN);
+      } catch (err) {
+        return jsonResponse({ error: err.message }, 500, origin, env.ALLOWED_ORIGIN);
+      }
+    }
+    if (path === '/api/user/sync' && request.method === 'GET') {
+      try {
+        const email = url.searchParams.get('email');
+        if (!email) return jsonResponse({ error: 'Email required' }, 400, origin, env.ALLOWED_ORIGIN);
+
+        const userKey = `user:${email.toLowerCase().trim()}`;
+        const raw = await env.PUSH_SUBSCRIPTIONS.get(userKey);
+        if (!raw) {
+          return jsonResponse({ exists: false }, 200, origin, env.ALLOWED_ORIGIN);
+        }
+        return jsonResponse({ exists: true, data: JSON.parse(raw) }, 200, origin, env.ALLOWED_ORIGIN);
+      } catch (err) {
+        return jsonResponse({ error: err.message }, 500, origin, env.ALLOWED_ORIGIN);
+      }
+    }
     if (path === '/api/vapid-key' && request.method === 'GET') {
       return handleVapidKey(env, origin);
     }
