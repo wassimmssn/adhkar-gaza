@@ -13,6 +13,7 @@ class AuthService extends ChangeNotifier {
   static const String _userKey = 'auth_user_profile_v1';
   static const String _lastSyncKey = 'auth_last_sync_v1';
   static const String _syncApiUrl = 'https://adhkar-push.wassimbousmaa.workers.dev/api/user/sync';
+  static const String googleClientId = '712885191318-46e55srndlla0f7eo7qb761p1kfhhnub.apps.googleusercontent.com';
 
   UserProfile? _currentUser;
   DateTime? _lastSyncTime;

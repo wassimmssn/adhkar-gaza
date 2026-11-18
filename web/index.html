@@ -38,7 +38,66 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <script>
-    // ── Google Sign-In Popup Listener ──────────────────────────────────────
+    // ── Google Sign-In Popup & GIS Listener ───────────────────────────────
+    const GOOGLE_CLIENT_ID = '712885191318-46e55srndlla0f7eo7qb761p1kfhhnub.apps.googleusercontent.com';
+
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function handleGoogleCredentialResponse(response) {
+      if (!response || !response.credential) return;
+      const profile = parseJwt(response.credential);
+      if (!profile) return;
+
+      const authData = {
+        type: 'GOOGLE_SIGN_IN_SUCCESS',
+        displayName: profile.name || profile.given_name || 'Utilisateur Google',
+        email: profile.email,
+        photoUrl: profile.picture || ''
+      };
+
+      try {
+        localStorage.setItem('auth_google_pending_login', JSON.stringify(authData));
+      } catch(e) {}
+      window.dispatchEvent(new CustomEvent('google-auth-success', { detail: JSON.stringify(authData) }));
+    }
+
+    window.initOfficialGoogleAuth = function() {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        window.google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredentialResponse,
+          auto_select: false,
+          cancel_on_tap_outside: true
+        });
+      }
+    };
+
+    window.triggerOfficialGooglePrompt = function() {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        window.google.accounts.id.prompt();
+      }
+    };
+
+    // Auto-init GIS once script loads
+    window.addEventListener('load', function() {
+      setTimeout(() => {
+        if (typeof window.initOfficialGoogleAuth === 'function') {
+          window.initOfficialGoogleAuth();
+        }
+      }, 800);
+    });
+
     window.addEventListener('message', function(event) {
       if (event.data && event.data.type === 'GOOGLE_SIGN_IN_SUCCESS') {
         try {
