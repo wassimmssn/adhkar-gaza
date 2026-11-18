@@ -680,6 +680,46 @@ class AppStrings {
       'ar': 'أذكار غزة — الإصدار 1.0',
       'fr': 'Adhkar Gaza — Version 1.0',
     },
+    'avatar_picker_title': {
+      'ar': 'اختيار الصورة الرمزية',
+      'fr': 'Choisir votre avatar',
+    },
+    'avatar_picker_subtitle': {
+      'ar': 'خصص مظهر ملفك بالرموز الروحية أو الحرف الأنيق',
+      'fr': 'Personnalisez votre profil avec des symboles spirituels ou votre initiale',
+    },
+    'avatar_tab_gallery': {
+      'ar': 'رموز روحية',
+      'fr': 'Galerie Spirituelle',
+    },
+    'avatar_tab_initials': {
+      'ar': 'حرف متدرج',
+      'fr': 'Initiale Stylisée',
+    },
+    'avatar_tab_url': {
+      'ar': 'رابط خارجي',
+      'fr': 'Lien Image',
+    },
+    'avatar_google_photo': {
+      'ar': 'استعادة صورة Google',
+      'fr': 'Photo Google officielle',
+    },
+    'avatar_updated_toast': {
+      'ar': 'تم تحديث الصورة الرمزية بنجاح ✨',
+      'fr': 'Photo de profil mise à jour ✨',
+    },
+    'avatar_edit_button': {
+      'ar': 'تغيير الصورة',
+      'fr': 'Modifier l’avatar',
+    },
+    'avatar_url_hint': {
+      'ar': 'https://exemple.com/image.jpg',
+      'fr': 'https://exemple.com/image.jpg',
+    },
+    'avatar_url_apply': {
+      'ar': 'تطبيق الصورة',
+      'fr': 'Appliquer l’image',
+    },
   };
 
   static String get(String key, String lang, [Map<String, String>? params]) {

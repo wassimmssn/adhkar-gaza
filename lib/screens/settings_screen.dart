@@ -8,6 +8,8 @@ import '../services/notification_service.dart';
 import '../l10n/app_strings.dart';
 import '../widgets/auth_dialog.dart';
 import '../widgets/glass_widgets.dart';
+import '../widgets/user_avatar.dart';
+import '../widgets/avatar_picker_dialog.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -59,19 +61,13 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundColor: theme.colorScheme.primary.withValues(alpha: isDark ? 0.2 : 0.1),
-                          backgroundImage: isLoggedIn && user?.photoUrl != null
-                              ? NetworkImage(user!.photoUrl!)
-                              : null,
-                          child: !isLoggedIn || user?.photoUrl == null
-                              ? Icon(
-                                  isLoggedIn ? Icons.person_rounded : Icons.person_outline_rounded,
-                                  color: theme.colorScheme.primary,
-                                  size: 26,
-                                )
-                              : null,
+                        UserAvatar(
+                          size: 50,
+                          photoUrl: authService.effectivePhotoUrl,
+                          displayName: user?.displayName ?? (lang == 'ar' ? 'زائر' : 'Invité'),
+                          isLoggedIn: isLoggedIn,
+                          showEditBadge: true,
+                          onTap: () => showAvatarPickerDialog(context),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
@@ -93,6 +89,30 @@ class SettingsScreen extends StatelessWidget {
                                     : AppStrings.get('account_guest_desc', lang),
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              InkWell(
+                                onTap: () => showAvatarPickerDialog(context),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.palette_outlined,
+                                      size: 13,
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      AppStrings.get('avatar_edit_button', lang),
+                                      style: TextStyle(
+                                        fontFamily: 'Cairo',
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: theme.colorScheme.primary,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],

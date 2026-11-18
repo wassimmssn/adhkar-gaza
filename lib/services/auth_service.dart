@@ -11,17 +11,21 @@ class AuthService extends ChangeNotifier {
   AuthService._internal();
 
   static const String _userKey = 'auth_user_profile_v1';
+  static const String _guestAvatarKey = 'guest_avatar_url_v1';
   static const String _lastSyncKey = 'auth_last_sync_v1';
   static const String _syncApiUrl = 'https://adhkar-push.wassimbousmaa.workers.dev/api/user/sync';
   static const String googleClientId = '712885191318-46e55srndlla0f7eo7qb761p1kfhhnub.apps.googleusercontent.com';
 
   UserProfile? _currentUser;
+  String? _guestAvatar;
   DateTime? _lastSyncTime;
   bool _isLoading = false;
   bool _isSyncing = false;
   void Function(UserProfile user)? onUserSignedIn;
 
   UserProfile? get currentUser => _currentUser;
+  String? get guestAvatar => _guestAvatar;
+  String? get effectivePhotoUrl => _currentUser?.photoUrl ?? _guestAvatar;
   DateTime? get lastSyncTime => _lastSyncTime;
   bool get isLoggedIn => _currentUser != null;
   bool get isLoading => _isLoading;
@@ -30,6 +34,7 @@ class AuthService extends ChangeNotifier {
   Future<void> init() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      _guestAvatar = prefs.getString(_guestAvatarKey);
       final userJson = prefs.getString(_userKey);
       if (userJson != null && userJson.isNotEmpty) {
         final Map<String, dynamic> data = jsonDecode(userJson);
@@ -45,6 +50,29 @@ class AuthService extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading saved auth: $e');
+    }
+  }
+
+  /// Updates the user's avatar (both for connected users and guest mode)
+  Future<void> updateAvatar(String newAvatarUrl) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (isLoggedIn && _currentUser != null) {
+        _currentUser = UserProfile(
+          id: _currentUser!.id,
+          email: _currentUser!.email,
+          displayName: _currentUser!.displayName,
+          photoUrl: newAvatarUrl,
+          createdAt: _currentUser!.createdAt,
+        );
+        await prefs.setString(_userKey, jsonEncode(_currentUser!.toJson()));
+      } else {
+        _guestAvatar = newAvatarUrl;
+        await prefs.setString(_guestAvatarKey, newAvatarUrl);
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error updating avatar: $e');
     }
   }
 

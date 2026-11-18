@@ -6,6 +6,7 @@ import '../providers/streak_provider.dart';
 import '../services/pwa_install_service.dart';
 import '../services/auth_service.dart';
 import '../widgets/auth_dialog.dart';
+import '../widgets/user_avatar.dart';
 import 'adhkar_screen.dart';
 import 'prayer_selection_screen.dart';
 import 'streak_dashboard_screen.dart';
@@ -213,21 +214,11 @@ class _HomeScreenState extends State<HomeScreen>
                         width: 1.5,
                       ),
                     ),
-                    child: CircleAvatar(
-                      radius: 16,
-                      backgroundColor: primaryColor.withValues(
-                        alpha: isDark ? 0.2 : 0.1,
-                      ),
-                      backgroundImage: isLoggedIn && user?.photoUrl != null
-                          ? NetworkImage(user!.photoUrl!)
-                          : null,
-                      child: !isLoggedIn || user?.photoUrl == null
-                          ? Icon(
-                              isLoggedIn ? Icons.person_rounded : Icons.person_outline_rounded,
-                              size: 18,
-                              color: primaryColor,
-                            )
-                          : null,
+                    child: UserAvatar(
+                      size: 32,
+                      photoUrl: authService.effectivePhotoUrl,
+                      displayName: user?.displayName ?? '',
+                      isLoggedIn: isLoggedIn,
                     ),
                   ),
                 ),

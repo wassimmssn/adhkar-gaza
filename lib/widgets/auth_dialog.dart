@@ -5,6 +5,8 @@ import '../l10n/app_strings.dart';
 import '../providers/settings_provider.dart';
 import '../providers/streak_provider.dart';
 import '../services/auth_service.dart';
+import 'user_avatar.dart';
+import 'avatar_picker_dialog.dart';
 
 /// Official 4-Color Google 'G' Vector Painter
 class GooglePainter extends CustomPainter {
@@ -612,36 +614,50 @@ Future<void> showUserProfileSheet(BuildContext context) async {
             ),
             const SizedBox(height: 20),
 
-            // Avatar with Google ring
+            // Avatar with edit button & Google ring
             Stack(
               alignment: Alignment.bottomRight,
               children: [
-                CircleAvatar(
-                  radius: 36,
-                  backgroundColor: primaryColor.withValues(alpha: 0.15),
-                  backgroundImage: user.photoUrl != null && user.photoUrl!.isNotEmpty
-                      ? NetworkImage(user.photoUrl!)
-                      : null,
-                  child: user.photoUrl == null
-                      ? Text(
-                          user.displayName.isNotEmpty ? user.displayName[0].toUpperCase() : 'U',
-                          style: TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: primaryColor,
-                          ),
-                        )
-                      : null,
+                UserAvatar(
+                  size: 72,
+                  photoUrl: authService.effectivePhotoUrl,
+                  displayName: user.displayName,
+                  isLoggedIn: true,
+                  showEditBadge: true,
+                  onTap: () {
+                    Navigator.of(sheetCtx).pop();
+                    showAvatarPickerDialog(context);
+                  },
                 ),
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
+                Positioned(
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const GoogleLogoWidget(size: 16),
                   ),
-                  child: const GoogleLogoWidget(size: 16),
                 ),
               ],
+            ),
+            const SizedBox(height: 6),
+            InkWell(
+              onTap: () {
+                Navigator.of(sheetCtx).pop();
+                showAvatarPickerDialog(context);
+              },
+              child: Text(
+                AppStrings.get('avatar_edit_button', lang),
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: primaryColor,
+                ),
+              ),
             ),
             const SizedBox(height: 12),
 
