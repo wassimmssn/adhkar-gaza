@@ -92,24 +92,14 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  /// Opens the authentic Google Account Chooser popup window
+  /// Launches the 100% official Google Identity Services OAuth popup (accounts.google.com)
   bool openGoogleSignInPopup({String lang = 'fr'}) {
     if (kIsWeb) {
       try {
-        final screenWidth = web.window.screen.width;
-        final screenHeight = web.window.screen.height;
-        const width = 460;
-        const height = 630;
-        final left = (screenWidth - width) ~/ 2;
-        final top = (screenHeight - height) ~/ 2;
-        final popup = web.window.open(
-          '/google-auth?lang=$lang',
-          'GoogleSignInPopup',
-          'width=$width,height=$height,left=$left,top=$top,toolbar=no,menubar=no,location=no,status=no',
-        );
-        return popup != null;
+        web.window.dispatchEvent(web.CustomEvent('launch-official-google-auth'));
+        return true;
       } catch (e) {
-        debugPrint('Popup open error: $e');
+        debugPrint('GIS trigger error: $e');
       }
     }
     return false;

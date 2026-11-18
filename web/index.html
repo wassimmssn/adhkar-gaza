@@ -81,7 +81,56 @@
           cancel_on_tap_outside: true
         });
       }
+      initGoogleOAuthClient();
     };
+
+    let tokenClient = null;
+
+    function initGoogleOAuthClient() {
+      if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+        tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email',
+          callback: async (tokenResponse) => {
+            if (tokenResponse && tokenResponse.access_token) {
+              try {
+                const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                  headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
+                });
+                const profile = await res.json();
+                const authData = {
+                  type: 'GOOGLE_SIGN_IN_SUCCESS',
+                  displayName: profile.name || profile.given_name || 'Utilisateur Google',
+                  email: profile.email,
+                  photoUrl: profile.picture || ''
+                };
+                try {
+                  localStorage.setItem('auth_google_pending_login', JSON.stringify(authData));
+                } catch(e) {}
+                window.dispatchEvent(new CustomEvent('google-auth-success', { detail: JSON.stringify(authData) }));
+              } catch (e) {
+                console.error('Error fetching Google profile:', e);
+              }
+            }
+          },
+        });
+      }
+    }
+
+    window.launchOfficialGoogleSignIn = function() {
+      if (!tokenClient) {
+        initGoogleOAuthClient();
+      }
+      if (tokenClient) {
+        tokenClient.requestAccessToken({ prompt: 'select_account' });
+      } else if (window.google && window.google.accounts && window.google.accounts.id) {
+        window.google.accounts.id.prompt();
+      }
+    };
+
+    window.addEventListener('launch-official-google-auth', function() {
+      window.launchOfficialGoogleSignIn();
+    });
 
     window.triggerOfficialGooglePrompt = function() {
       if (window.google && window.google.accounts && window.google.accounts.id) {

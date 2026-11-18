@@ -2,12 +2,9 @@
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: https://lh3.googleusercontent.com https://accounts.google.com; frame-src 'self' https://accounts.google.com; media-src 'self' blob: https://everyayah.com https://cdn.islamic.network https://download.quranicaudio.com; connect-src 'self' https://www.gstatic.com https://fonts.gstatic.com https://fonts.googleapis.com https://ipwho.is https://adhkar-push.wassimbousmaa.workers.dev https://api.quran.com https://everyayah.com https://accounts.google.com; worker-src 'self' blob:;
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.gstatic.com https://accounts.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: https://lh3.googleusercontent.com https://accounts.google.com; frame-src 'self' https://accounts.google.com; media-src 'self' blob: https://everyayah.com https://cdn.islamic.network https://download.quranicaudio.com; connect-src 'self' https://www.gstatic.com https://fonts.gstatic.com https://fonts.googleapis.com https://ipwho.is https://adhkar-push.wassimbousmaa.workers.dev https://api.quran.com https://everyayah.com https://accounts.google.com https://www.googleapis.com; worker-src 'self' blob:;
 
 /index.html
-  Cache-Control: no-cache, no-store, must-revalidate
-
-/google-auth
   Cache-Control: no-cache, no-store, must-revalidate
 
 /flutter_service_worker.js
