@@ -614,16 +614,16 @@ Future<void> showUserProfileSheet(BuildContext context) async {
             ),
             const SizedBox(height: 20),
 
-            // Avatar with edit button & Google ring
+            // Avatar with single Google badge
             Stack(
               alignment: Alignment.bottomRight,
               children: [
                 UserAvatar(
-                  size: 72,
+                  size: 76,
                   photoUrl: authService.effectivePhotoUrl,
                   displayName: user.displayName,
                   isLoggedIn: true,
-                  showEditBadge: true,
+                  showEditBadge: false,
                   onTap: () {
                     Navigator.of(sheetCtx).pop();
                     showAvatarPickerDialog(context);
@@ -634,28 +634,50 @@ Future<void> showUserProfileSheet(BuildContext context) async {
                   bottom: 0,
                   child: Container(
                     padding: const EdgeInsets.all(4),
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E293B) : Colors.white,
                       shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
                     ),
-                    child: const GoogleLogoWidget(size: 16),
+                    child: const GoogleLogoWidget(size: 18),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 10),
             InkWell(
               onTap: () {
                 Navigator.of(sheetCtx).pop();
                 showAvatarPickerDialog(context);
               },
-              child: Text(
-                AppStrings.get('avatar_edit_button', lang),
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w700,
-                  color: primaryColor,
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                decoration: BoxDecoration(
+                  color: primaryColor.withValues(alpha: isDark ? 0.2 : 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.palette_outlined, size: 14, color: primaryColor),
+                    const SizedBox(width: 6),
+                    Text(
+                      AppStrings.get('avatar_edit_button', lang),
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: primaryColor,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

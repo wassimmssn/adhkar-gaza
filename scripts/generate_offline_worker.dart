@@ -122,20 +122,37 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 1. Navigation / HTML Requests: Network-First with 1500ms timeout + offline cache fallback
-  // Guarantees that any refresh or fresh visit receives the new deployed version on the very 1st refresh!
+  // Helper to reliably retrieve cached navigation entry (matching /, /index.html or request)
+  function matchNavigationCache(request) {
+    return caches.match(request).then((cached) => {
+      if (cached) return cached;
+      return caches.match('/').then((rootCached) => {
+        if (rootCached) return rootCached;
+        return caches.match('/index.html');
+      });
+    });
+  }
+
+  // 1. Navigation / HTML Requests: 100% Offline-First reliability + Network-First when online
   if (event.request.mode === 'navigate' || event.request.url.endsWith('/index.html') || event.request.url.endsWith('/')) {
+    // If offline, serve immediately from cache with 0ms lag!
+    if (!navigator.onLine) {
+      event.respondWith(matchNavigationCache(event.request));
+      return;
+    }
+
+    // When online: Fast Network-First with 1200ms timeout + offline cache fallback
     event.respondWith(
       new Promise((resolve) => {
         let resolved = false;
         const timer = setTimeout(() => {
           if (!resolved) {
             resolved = true;
-            caches.match('/index.html').then((cached) => {
+            matchNavigationCache(event.request).then((cached) => {
               if (cached) resolve(cached);
             });
           }
-        }, 1500);
+        }, 1200);
 
         fetch(event.request, { cache: 'no-cache' })
           .then((networkResponse) => {
@@ -144,10 +161,15 @@ self.addEventListener('fetch', (event) => {
               resolved = true;
               if (networkResponse && networkResponse.status === 200) {
                 const copy = networkResponse.clone();
-                caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', copy));
+                caches.open(CACHE_NAME).then((cache) => {
+                  cache.put('/', copy.clone());
+                  cache.put('/index.html', copy);
+                });
                 resolve(networkResponse);
               } else {
-                caches.match('/index.html').then((cached) => resolve(cached || networkResponse));
+                matchNavigationCache(event.request).then((cached) => {
+                  resolve(cached || networkResponse);
+                });
               }
             }
           })
@@ -155,14 +177,11 @@ self.addEventListener('fetch', (event) => {
             clearTimeout(timer);
             if (!resolved) {
               resolved = true;
-              caches.match('/index.html').then((cached) => {
+              matchNavigationCache(event.request).then((cached) => {
                 if (cached) {
                   resolve(cached);
                 } else {
-                  resolve(new Response('Hors ligne', {
-                    status: 503,
-                    headers: { 'Content-Type': 'text/plain; charset=utf-8' }
-                  }));
+                  caches.match(event.request).then((fallback) => resolve(fallback));
                 }
               });
             }
@@ -172,9 +191,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 2. Core JavaScript code: Network-First (with cache fallback)
-  // Ensures updated code is picked up on the 1st refresh, but works 100% offline
-  if (event.request.url.includes('main.dart.js') || event.request.url.includes('flutter.js')) {
+  // 2. Core JavaScript code: Network-First when online, Instant Cache when offline
+  if (event.request.url.includes('main.dart.js') || event.request.url.includes('flutter.js') || event.request.url.includes('flutter_bootstrap.js')) {
+    if (!navigator.onLine) {
+      event.respondWith(caches.match(event.request));
+      return;
+    }
     event.respondWith(
       fetch(event.request, { cache: 'no-cache' })
         .then((networkResponse) => {
@@ -194,6 +216,12 @@ self.addEventListener('fetch', (event) => {
 
   // 3. Network-First strategy for JSON data (adhkar, manifests, etc)
   if (event.request.url.endsWith('.json')) {
+    if (!navigator.onLine) {
+      event.respondWith(
+        caches.match(event.request).then((cached) => cached || new Response('{}', { headers: { 'Content-Type': 'application/json' } }))
+      );
+      return;
+    }
     event.respondWith(
       fetch(event.request, { cache: 'no-store' }).then((networkResponse) => {
         if (networkResponse && networkResponse.status === 200) {
@@ -204,10 +232,9 @@ self.addEventListener('fetch', (event) => {
         }
         return networkResponse;
       }).catch((err) => {
-        console.warn('Network-first fetch failed for JSON (CSP or offline):', event.request.url, err);
+        console.warn('Network fetch failed for JSON, using offline cache:', event.request.url);
         return caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) return cachedResponse;
-          // If neither network nor cache has it, return a safe dummy response to prevent TypeError
           return new Response('{}', { 
             status: 408, 
             statusText: 'No network and no cache available',
