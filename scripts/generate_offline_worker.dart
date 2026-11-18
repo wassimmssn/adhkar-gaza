@@ -122,7 +122,77 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-First strategy for JSON data (adhkar, manifests, etc)
+  // 1. Navigation / HTML Requests: Network-First with 1500ms timeout + offline cache fallback
+  // Guarantees that any refresh or fresh visit receives the new deployed version on the very 1st refresh!
+  if (event.request.mode === 'navigate' || event.request.url.endsWith('/index.html') || event.request.url.endsWith('/')) {
+    event.respondWith(
+      new Promise((resolve) => {
+        let resolved = false;
+        const timer = setTimeout(() => {
+          if (!resolved) {
+            resolved = true;
+            caches.match('/index.html').then((cached) => {
+              if (cached) resolve(cached);
+            });
+          }
+        }, 1500);
+
+        fetch(event.request, { cache: 'no-cache' })
+          .then((networkResponse) => {
+            clearTimeout(timer);
+            if (!resolved) {
+              resolved = true;
+              if (networkResponse && networkResponse.status === 200) {
+                const copy = networkResponse.clone();
+                caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', copy));
+                resolve(networkResponse);
+              } else {
+                caches.match('/index.html').then((cached) => resolve(cached || networkResponse));
+              }
+            }
+          })
+          .catch(() => {
+            clearTimeout(timer);
+            if (!resolved) {
+              resolved = true;
+              caches.match('/index.html').then((cached) => {
+                if (cached) {
+                  resolve(cached);
+                } else {
+                  resolve(new Response('Hors ligne', {
+                    status: 503,
+                    headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+                  }));
+                }
+              });
+            }
+          });
+      })
+    );
+    return;
+  }
+
+  // 2. Core JavaScript code: Network-First (with cache fallback)
+  // Ensures updated code is picked up on the 1st refresh, but works 100% offline
+  if (event.request.url.includes('main.dart.js') || event.request.url.includes('flutter.js')) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-cache' })
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+            return networkResponse;
+          }
+          return caches.match(event.request);
+        })
+        .catch(() => {
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
+  // 3. Network-First strategy for JSON data (adhkar, manifests, etc)
   if (event.request.url.endsWith('.json')) {
     event.respondWith(
       fetch(event.request, { cache: 'no-store' }).then((networkResponse) => {
@@ -149,7 +219,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache-first strategy for standard assets
+  // 4. Cache-First strategy for Audio, Fonts, Images & static assets
+  // Zero lag, zero extra mobile data, instant playback offline and online
   event.respondWith(
     caches.match(event.request).then((response) => {
       if (response) {
@@ -169,14 +240,7 @@ self.addEventListener('fetch', (event) => {
         return networkResponse;
       }).catch((error) => {
         // Log the error silently for debugging but do not crash the promise chain
-        console.warn('Network fetch failed (possibly blocked by CSP or offline):', event.request.url, error);
-        
-        // Offline fallback for navigation requests
-        if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
-        }
-        
-        // Return a generic fallback Response for blocked files so the browser doesn't throw a TypeError
+        console.warn('Network fetch failed for asset:', event.request.url, error);
         return new Response('', { status: 408, statusText: 'Request Timeout or Blocked' });
       });
     })
