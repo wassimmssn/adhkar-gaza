@@ -613,12 +613,44 @@ class AppStrings {
       'fr': 'Profil Utilisateur',
     },
     'dialog_google_title': {
-      'ar': 'تسجيل الدخول بـ Google',
-      'fr': 'Connexion Google 1-Clic',
+      'ar': 'اختيار حساب',
+      'fr': 'Choisir un compte',
     },
     'dialog_google_subtitle': {
-      'ar': 'أدخل معلومات حسابك لحفظ تقدمك ومزامنته سحابياً',
-      'fr': 'Associez votre compte pour sauvegarder vos séries d’invocations',
+      'ar': 'للمتابعة إلى أذكار غزة',
+      'fr': 'pour continuer vers Adhkar Gaza',
+    },
+    'google_choose_account': {
+      'ar': 'اختيار حساب',
+      'fr': 'Choisir un compte',
+    },
+    'google_to_continue': {
+      'ar': 'للمتابعة إلى أذكار غزة',
+      'fr': 'pour continuer vers Adhkar Gaza',
+    },
+    'google_use_another_account': {
+      'ar': 'استخدام حساب آخر',
+      'fr': 'Utiliser un autre compte',
+    },
+    'google_privacy_notice': {
+      'ar': 'للمتابعة، ستشارك Google اسمك وعنوان بريدك الإلكتروني وصورة ملفك الشخصي مع أذكار غزة.',
+      'fr': 'Pour continuer, Google partagera votre nom, votre adresse e-mail et votre photo de profil avec Adhkar Gaza.',
+    },
+    'google_signing_in': {
+      'ar': 'جاري التحقق والاتصال...',
+      'fr': 'Connexion en cours...',
+    },
+    'google_popup_opened': {
+      'ar': 'تم فتح نافذة Google لتسجيل الدخول',
+      'fr': 'Fenêtre de connexion Google ouverte',
+    },
+    'google_enter_email': {
+      'ar': 'أدخل عنوان بريدك الإلكتروني',
+      'fr': 'Saisissez votre adresse e-mail',
+    },
+    'google_next': {
+      'ar': 'التالي',
+      'fr': 'Suivant',
     },
     'dialog_google_email_hint': {
       'ar': 'عنوان Gmail',

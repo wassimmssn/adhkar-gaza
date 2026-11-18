@@ -18,6 +18,7 @@ class AuthService extends ChangeNotifier {
   DateTime? _lastSyncTime;
   bool _isLoading = false;
   bool _isSyncing = false;
+  void Function(UserProfile user)? onUserSignedIn;
 
   UserProfile? get currentUser => _currentUser;
   DateTime? get lastSyncTime => _lastSyncTime;
@@ -37,10 +38,80 @@ class AuthService extends ChangeNotifier {
       if (lastSyncStr != null) {
         _lastSyncTime = DateTime.tryParse(lastSyncStr);
       }
+      if (kIsWeb) {
+        _setupWebAuthListener();
+      }
       notifyListeners();
     } catch (e) {
       debugPrint('Error loading saved auth: $e');
     }
+  }
+
+  void _setupWebAuthListener() {
+    try {
+      web.window.addEventListener(
+        'google-auth-success',
+        ((web.CustomEvent event) {
+          try {
+            final detail = (event.detail as JSString).toDart;
+            final Map<String, dynamic> data = jsonDecode(detail);
+            _processAuthPayload(data);
+          } catch (_) {}
+        }.toJS),
+      );
+
+      // Check for pending login from redirect or storage
+      final pending = web.window.localStorage.getItem('auth_google_pending_login');
+      if (pending != null && pending.isNotEmpty) {
+        web.window.localStorage.removeItem('auth_google_pending_login');
+        final Map<String, dynamic> data = jsonDecode(pending);
+        _processAuthPayload(data);
+      }
+    } catch (e) {
+      debugPrint('Error setting up web auth listener: $e');
+    }
+  }
+
+  void _processAuthPayload(Map<String, dynamic> data) {
+    if (data['type'] == 'GOOGLE_SIGN_IN_SUCCESS') {
+      final email = data['email'] as String? ?? '';
+      final name = data['displayName'] as String? ?? '';
+      final photo = data['photoUrl'] as String?;
+      if (email.isNotEmpty) {
+        signInWithGoogle(
+          email: email,
+          displayName: name.isNotEmpty ? name : email.split('@').first,
+          photoUrl: photo,
+        ).then((success) {
+          if (success && _currentUser != null && onUserSignedIn != null) {
+            onUserSignedIn!(_currentUser!);
+          }
+        });
+      }
+    }
+  }
+
+  /// Opens the authentic Google Account Chooser popup window
+  bool openGoogleSignInPopup({String lang = 'fr'}) {
+    if (kIsWeb) {
+      try {
+        final screenWidth = web.window.screen.width;
+        final screenHeight = web.window.screen.height;
+        const width = 460;
+        const height = 630;
+        final left = (screenWidth - width) ~/ 2;
+        final top = (screenHeight - height) ~/ 2;
+        final popup = web.window.open(
+          '/google-auth.html?lang=$lang',
+          'GoogleSignInPopup',
+          'width=$width,height=$height,left=$left,top=$top,toolbar=no,menubar=no,location=no,status=no',
+        );
+        return popup != null;
+      } catch (e) {
+        debugPrint('Popup open error: $e');
+      }
+    }
+    return false;
   }
 
   /// 1-Click Google Sign-In

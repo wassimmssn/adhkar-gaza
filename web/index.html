@@ -34,7 +34,20 @@
   <!-- Preload core scripts -->
   <link rel="preload" href="flutter.js" as="script">
 
+  <!-- Google Identity Services (GIS) for Google Sign-In -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+
   <script>
+    // ── Google Sign-In Popup Listener ──────────────────────────────────────
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'GOOGLE_SIGN_IN_SUCCESS') {
+        try {
+          localStorage.setItem('auth_google_pending_login', JSON.stringify(event.data));
+        } catch(e) {}
+        window.dispatchEvent(new CustomEvent('google-auth-success', { detail: JSON.stringify(event.data) }));
+      }
+    });
+
     // ── Web Push Subscription Helpers ──────────────────────────────────────
     const WORKER_URL = 'https://adhkar-push.wassimbousmaa.workers.dev';
     let cachedVapidKey = null;
