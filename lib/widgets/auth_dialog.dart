@@ -581,8 +581,11 @@ Future<void> showUserProfileSheet(BuildContext context) async {
   await showModalBottomSheet(
     context: context,
     backgroundColor: Colors.transparent,
+    isScrollControlled: true,
     builder: (sheetCtx) {
-      return Container(
+      return SafeArea(
+        child: SingleChildScrollView(
+        child: Container(
         margin: const EdgeInsets.all(16),
         padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
@@ -786,6 +789,8 @@ Future<void> showUserProfileSheet(BuildContext context) async {
               ),
             ),
           ],
+        ),
+      ),
         ),
       );
     },

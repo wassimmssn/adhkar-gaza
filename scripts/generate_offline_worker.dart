@@ -122,6 +122,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Bypass legacy google-auth URLs (removed page — let network return 404 cleanly)
+  if (event.request.url.includes('/google-auth')) {
+    return;
+  }
+
   // Helper to reliably retrieve cached navigation entry (matching /, /index.html or request)
   function matchNavigationCache(request) {
     return caches.match(request).then((cached) => {
