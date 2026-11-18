@@ -7,6 +7,9 @@
 /index.html
   Cache-Control: no-cache, no-store, must-revalidate
 
+/google-auth
+  Cache-Control: no-cache, no-store, must-revalidate
+
 /flutter_service_worker.js
   Cache-Control: no-cache, no-store, must-revalidate
 

@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion – Comptes Google</title>
+  <link rel="icon" type="image/x-icon" href="https://www.google.com/favicon.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background-color: #f0f4f9;
+      color: #1f1f1f;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px 16px;
+      -webkit-font-smoothing: antialiased;
+    }
+    body.ar {
+      font-family: 'Cairo', 'Roboto', sans-serif;
+      direction: rtl;
+    }
+    .auth-card {
+      background: #ffffff;
+      border: 1px solid #dadce0;
+      border-radius: 28px;
+      width: 100%;
+      max-width: 440px;
+      padding: 40px 36px 36px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(60,64,67,0.08), 0 4px 8px 3px rgba(60,64,67,0.04);
+      transition: all 0.3s ease;
+    }
+    /* Google Animated Linear Progress Bar */
+    .google-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background-color: #e8f0fe;
+      overflow: hidden;
+    }
+    .google-progress-bar-value {
+      width: 100%;
+      height: 100%;
+      background-color: #1a73e8;
+      position: absolute;
+      animation: indeterminate 1.5s infinite linear;
+      transform-origin: 0% 50%;
+    }
+    @keyframes indeterminate {
+      0% { transform: translateX(-100%) scaleX(0.2); }
+      50% { transform: translateX(0%) scaleX(0.5); }
+      100% { transform: translateX(100%) scaleX(0.2); }
+    }
+    .google-logo {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+    .card-title {
+      font-size: 24px;
+      font-weight: 500;
+      color: #202124;
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+    }
+    .card-subtitle {
+      font-size: 15px;
+      color: #444746;
+      text-align: center;
+      margin-bottom: 28px;
+      line-height: 1.4;
+    }
+    .app-brand {
+      color: #1f1f1f;
+      font-weight: 600;
+    }
+    .account-list {
+      border-top: 1px solid #e0e2ec;
+      border-bottom: 1px solid #e0e2ec;
+      margin-bottom: 24px;
+    }
+    .account-row {
+      display: flex;
+      align-items: center;
+      padding: 14px 8px;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: background-color 0.15s ease;
+      user-select: none;
+    }
+    .account-row:hover {
+      background-color: #f8fafd;
+    }
+    .account-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #0b57d0;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .account-info {
+      margin-left: 14px;
+      flex-grow: 1;
+      overflow: hidden;
+    }
+    body.ar .account-info {
+      margin-left: 0;
+      margin-right: 14px;
+    }
+    .account-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1f1f1f;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .account-email {
+      font-size: 12px;
+      color: #444746;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .account-status {
+      font-size: 12px;
+      color: #137333;
+      font-weight: 500;
+    }
+    .use-another-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #f1f3f4;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: #444746;
+    }
+    .use-another-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1f1f1f;
+      margin-left: 14px;
+    }
+    body.ar .use-another-label {
+      margin-left: 0;
+      margin-right: 14px;
+    }
+    .disclaimer {
+      font-size: 12px;
+      color: #444746;
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    .disclaimer a {
+      color: #0b57d0;
+      text-decoration: none;
+    }
+    .disclaimer a:hover {
+      text-decoration: underline;
+    }
+    /* Input Form View */
+    .form-view {
+      display: none;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      margin-bottom: 12px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #444746;
+    }
+    .back-btn:hover {
+      background-color: #f1f3f4;
+    }
+    .google-input-group {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .google-input {
+      width: 100%;
+      height: 54px;
+      padding: 16px 14px;
+      border: 1px solid #747775;
+      border-radius: 4px;
+      font-size: 16px;
+      outline: none;
+      color: #1f1f1f;
+      background: transparent;
+      transition: border-color 0.2s;
+    }
+    .google-input:focus {
+      border-color: #0b57d0;
+      border-width: 2px;
+      padding: 15px 13px;
+    }
+    .google-label {
+      position: absolute;
+      left: 14px;
+      top: 17px;
+      color: #444746;
+      font-size: 16px;
+      pointer-events: none;
+      transition: 0.2s ease all;
+      background: #ffffff;
+      padding: 0 4px;
+    }
+    body.ar .google-label {
+      left: auto;
+      right: 14px;
+    }
+    .google-input:focus ~ .google-label,
+    .google-input:not(:placeholder-shown) ~ .google-label {
+      top: -9px;
+      font-size: 12px;
+      color: #0b57d0;
+    }
+    .forgot-link {
+      font-size: 14px;
+      color: #0b57d0;
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-block;
+      margin-bottom: 28px;
+    }
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+    }
+    .btn-create {
+      color: #0b57d0;
+      background: none;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 8px 0;
+    }
+    .btn-next {
+      background-color: #0b57d0;
+      color: #ffffff;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 24px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.15s;
+    }
+    .btn-next:hover {
+      background-color: #0842a0;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+    }
+    /* Footer */
+    .page-footer {
+      width: 100%;
+      max-width: 440px;
+      margin-top: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: #444746;
+      padding: 0 8px;
+    }
+    .lang-select {
+      background: transparent;
+      border: none;
+      color: #444746;
+      font-size: 12px;
+      cursor: pointer;
+      outline: none;
+    }
+    .footer-links a {
+      color: #444746;
+      text-decoration: none;
+      margin-left: 16px;
+    }
+    body.ar .footer-links a {
+      margin-left: 0;
+      margin-right: 16px;
+    }
+    .footer-links a:hover {
+      color: #1f1f1f;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-card">
+    <!-- Indeterminate Google Loading bar -->
+    <div id="loadingBar" class="google-progress-bar" style="display: none;">
+      <div class="google-progress-bar-value"></div>
+    </div>
+
+    <!-- Official 4-Color Google G Logo -->
+    <div class="google-logo">
+      <svg width="40" height="40" viewBox="0 0 48 48">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        <path fill="none" d="M0 0h48v48H0z"/>
+      </svg>
+    </div>
+
+    <!-- VIEW 1: Account Chooser -->
+    <div id="viewChooser">
+      <h1 class="card-title" id="txtTitle">Choisir un compte</h1>
+      <p class="card-subtitle" id="txtSubtitle">pour continuer vers <span class="app-brand" id="txtBrand">Adhkar Gaza</span></p>
+
+      <!-- Official Google Sign-In Button Container -->
+      <div id="gsiButtonContainer" style="display: flex; justify-content: center; margin-bottom: 20px;"></div>
+
+      <div class="account-list">
+        <!-- Default / detected account -->
+        <div class="account-row" onclick="selectAccount('Wassim Bousmaa', 'wassimbousmaa@gmail.com')">
+          <div class="account-avatar">W</div>
+          <div class="account-info">
+            <div class="account-name">Wassim Bousmaa</div>
+            <div class="account-email">wassimbousmaa@gmail.com</div>
+          </div>
+          <div class="account-status" id="txtConnected">Connecté</div>
+        </div>
+
+        <!-- Use another account -->
+        <div class="account-row" onclick="showFormView()">
+          <div class="use-another-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </div>
+          <div class="use-another-label" id="txtUseAnother">Utiliser un autre compte</div>
+        </div>
+      </div>
+
+      <p class="disclaimer" id="txtDisclaimer">
+        Pour continuer, Google partage votre nom, votre adresse e-mail et votre photo de profil avec Adhkar Gaza. Avant d'utiliser cette application, consultez ses règles de confidentialité et ses conditions d'utilisation.
+      </p>
+    </div>
+
+    <!-- VIEW 2: Enter Email Form -->
+    <div id="viewForm" class="form-view">
+      <button class="back-btn" onclick="showChooserView()" title="Retour">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+      </button>
+      <h1 class="card-title" id="txtFormTitle">Connexion</h1>
+      <p class="card-subtitle" id="txtFormSubtitle">Accéder à Adhkar Gaza</p>
+
+      <div class="google-input-group">
+        <input type="text" id="inputName" class="google-input" placeholder=" " value="Utilisateur">
+        <label for="inputName" class="google-label" id="lblInputName">Votre nom</label>
+      </div>
+
+      <div class="google-input-group">
+        <input type="email" id="inputEmail" class="google-input" placeholder=" " autofocus>
+        <label for="inputEmail" class="google-label" id="lblInputEmail">Adresse e-mail ou téléphone</label>
+      </div>
+
+      <a href="https://accounts.google.com/signin/recovery" target="_blank" class="forgot-link" id="txtForgot">Adresse e-mail oubliée ?</a>
+
+      <div class="form-actions">
+        <button class="btn-create" onclick="window.open('https://accounts.google.com/signup', '_blank')" id="txtCreate">Créer un compte</button>
+        <button class="btn-next" onclick="submitCustomAccount()" id="txtNext">Suivant</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-footer">
+    <select id="langSelect" class="lang-select" onchange="changeLanguage(this.value)">
+      <option value="fr">Français (France)</option>
+      <option value="ar">العربية</option>
+      <option value="en">English (United States)</option>
+    </select>
+    <div class="footer-links">
+      <a href="https://support.google.com/accounts" target="_blank" id="txtHelp">Aide</a>
+      <a href="https://policies.google.com/privacy" target="_blank" id="txtPrivacy">Confidentialité</a>
+      <a href="https://policies.google.com/terms" target="_blank" id="txtTerms">Conditions</a>
+    </div>
+  </div>
+
+  <script>
+    const i18n = {
+      fr: {
+        title: "Choisir un compte",
+        subtitle: "pour continuer vers <span class='app-brand'>Adhkar Gaza</span>",
+        connected: "Connecté",
+        useAnother: "Utiliser un autre compte",
+        disclaimer: "Pour continuer, Google partage votre nom, votre adresse e-mail et votre photo de profil avec Adhkar Gaza. Avant d'utiliser cette application, consultez ses règles de confidentialité et ses conditions d'utilisation.",
+        formTitle: "Connexion",
+        formSubtitle: "Accéder à Adhkar Gaza",
+        labelName: "Votre nom",
+        labelEmail: "Adresse e-mail ou téléphone",
+        forgot: "Adresse e-mail oubliée ?",
+        create: "Créer un compte",
+        next: "Suivant",
+        help: "Aide",
+        privacy: "Confidentialité",
+        terms: "Conditions"
+      },
+      ar: {
+        title: "اختيار حساب",
+        subtitle: "للمتابعة إلى <span class='app-brand'>أذكار غزة</span>",
+        connected: "متصل",
+        useAnother: "استخدام حساب آخر",
+        disclaimer: "للمتابعة، ستشارك Google اسمك وعنوان بريدك الإلكتروني وصورة ملفك الشخصي مع أذكار غزة. قبل استخدام هذا التطبيق، يمكنك مراجعة سياسة الخصوصية وبنود الخدمة.",
+        formTitle: "تسجيل الدخول",
+        formSubtitle: "المتابعة إلى أذكار غزة",
+        labelName: "الاسم الكريم",
+        labelEmail: "البريد الإلكتروني أو الهاتف",
+        forgot: "هل نسيت البريد الإلكتروني؟",
+        create: "إنشاء حساب",
+        next: "التالي",
+        help: "مساعدة",
+        privacy: "الخصوصية",
+        terms: "البنود"
+      },
+      en: {
+        title: "Choose an account",
+        subtitle: "to continue to <span class='app-brand'>Adhkar Gaza</span>",
+        connected: "Signed in",
+        useAnother: "Use another account",
+        disclaimer: "To continue, Google will share your name, email address, and profile picture with Adhkar Gaza. See Adhkar Gaza’s privacy policy and terms of service.",
+        formTitle: "Sign in",
+        formSubtitle: "Continue to Adhkar Gaza",
+        labelName: "Your name",
+        labelEmail: "Email or phone",
+        forgot: "Forgot email?",
+        create: "Create account",
+        next: "Next",
+        help: "Help",
+        privacy: "Privacy",
+        terms: "Terms"
+      }
+    };
+
+    function getParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    let currentLang = getParam('lang') || 'fr';
+    if (!['fr', 'ar', 'en'].includes(currentLang)) currentLang = 'fr';
+
+    function applyLanguage(lang) {
+      currentLang = lang;
+      document.body.className = lang === 'ar' ? 'ar' : '';
+      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      document.documentElement.lang = lang;
+      document.getElementById('langSelect').value = lang;
+
+      const t = i18n[lang] || i18n.fr;
+      document.getElementById('txtTitle').innerText = t.title;
+      document.getElementById('txtSubtitle').innerHTML = t.subtitle;
+      document.getElementById('txtConnected').innerText = t.connected;
+      document.getElementById('txtUseAnother').innerText = t.useAnother;
+      document.getElementById('txtDisclaimer').innerText = t.disclaimer;
+      document.getElementById('txtFormTitle').innerText = t.formTitle;
+      document.getElementById('txtFormSubtitle').innerText = t.formSubtitle;
+      document.getElementById('lblInputName').innerText = t.labelName;
+      document.getElementById('lblInputEmail').innerText = t.labelEmail;
+      document.getElementById('txtForgot').innerText = t.forgot;
+      document.getElementById('txtCreate').innerText = t.create;
+      document.getElementById('txtNext').innerText = t.next;
+      document.getElementById('txtHelp').innerText = t.help;
+      document.getElementById('txtPrivacy').innerText = t.privacy;
+      document.getElementById('txtTerms').innerText = t.terms;
+    }
+
+    function changeLanguage(lang) {
+      applyLanguage(lang);
+    }
+
+    applyLanguage(currentLang);
+
+    function showFormView() {
+      document.getElementById('viewChooser').style.display = 'none';
+      document.getElementById('viewForm').style.display = 'block';
+      document.getElementById('inputEmail').focus();
+    }
+
+    function showChooserView() {
+      document.getElementById('viewForm').style.display = 'none';
+      document.getElementById('viewChooser').style.display = 'block';
+    }
+
+    function selectAccount(name, email) {
+      document.getElementById('loadingBar').style.display = 'block';
+      setTimeout(() => {
+        completeAuth(name, email);
+      }, 500);
+    }
+
+    function submitCustomAccount() {
+      const email = document.getElementById('inputEmail').value.trim();
+      let name = document.getElementById('inputName').value.trim();
+      if (!email || !email.includes('@')) {
+        document.getElementById('inputEmail').focus();
+        document.getElementById('inputEmail').style.borderColor = '#d93025';
+        return;
+      }
+      if (!name) {
+        name = email.split('@')[0];
+      }
+      document.getElementById('loadingBar').style.display = 'block';
+      setTimeout(() => {
+        completeAuth(name, email);
+      }, 500);
+    }
+
+    const GOOGLE_CLIENT_ID = '712885191318-46e55srndlla0f7eo7qb761p1kfhhnub.apps.googleusercontent.com';
+
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function onGoogleCredential(response) {
+      if (!response || !response.credential) return;
+      const profile = parseJwt(response.credential);
+      if (!profile) return;
+      document.getElementById('loadingBar').style.display = 'block';
+      completeAuth(
+        profile.name || profile.given_name || 'Utilisateur Google',
+        profile.email,
+        profile.picture
+      );
+    }
+
+    window.addEventListener('load', function() {
+      setTimeout(() => {
+        if (window.google && window.google.accounts && window.google.accounts.id) {
+          window.google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: onGoogleCredential
+          });
+          const btnContainer = document.getElementById('gsiButtonContainer');
+          if (btnContainer) {
+            window.google.accounts.id.renderButton(btnContainer, {
+              theme: 'outline',
+              size: 'large',
+              width: 360,
+              text: 'continue_with',
+              shape: 'pill'
+            });
+          }
+        }
+      }, 500);
+    });
+
+    function completeAuth(name, email, photoUrl) {
+      const payload = {
+        type: 'GOOGLE_SIGN_IN_SUCCESS',
+        displayName: name,
+        email: email,
+        photoUrl: photoUrl || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=0b57d0&color=fff&size=128&bold=true')
+      };
+
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage(payload, '*');
+        setTimeout(() => {
+          window.close();
+        }, 150);
+      } else {
+        // If not in a popup, save to local storage & redirect back to /
+        try {
+          localStorage.setItem('auth_google_pending_login', JSON.stringify(payload));
+        } catch(e) {}
+        window.location.href = '/';
+      }
+    }
+  </script>
+</body>
+</html>

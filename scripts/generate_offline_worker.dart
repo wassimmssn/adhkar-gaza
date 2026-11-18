@@ -122,9 +122,17 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Bypass Google Auth popup from SPA root navigation rewrite
+  if (event.request.url.includes('google-auth')) {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match('/google-auth') || caches.match('/google-auth.html'))
+    );
+    return;
+  }
+
   // 1. Navigation / HTML Requests: Network-First with 1500ms timeout + offline cache fallback
   // Guarantees that any refresh or fresh visit receives the new deployed version on the very 1st refresh!
-  if (event.request.mode === 'navigate' || event.request.url.endsWith('/index.html') || event.request.url.endsWith('/')) {
+  if ((event.request.mode === 'navigate' || event.request.url.endsWith('/index.html') || event.request.url.endsWith('/')) && !event.request.url.includes('google-auth')) {
     event.respondWith(
       new Promise((resolve) => {
         let resolved = false;

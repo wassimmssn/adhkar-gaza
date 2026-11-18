@@ -103,7 +103,7 @@ class AuthService extends ChangeNotifier {
         final left = (screenWidth - width) ~/ 2;
         final top = (screenHeight - height) ~/ 2;
         final popup = web.window.open(
-          '/google-auth.html?lang=$lang',
+          '/google-auth?lang=$lang',
           'GoogleSignInPopup',
           'width=$width,height=$height,left=$left,top=$top,toolbar=no,menubar=no,location=no,status=no',
         );
