@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/daily_tracker.dart';
+import 'crypto_service.dart';
 
 class StreakService {
   static const String _storageKey = 'streak_tracker_data_v1';
@@ -27,12 +28,17 @@ class StreakService {
 
   static Future<Map<String, DayCompletion>> loadAllData() async {
     final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString(_storageKey);
-    if (jsonString == null || jsonString.isEmpty) {
+    final rawString = prefs.getString(_storageKey);
+    if (rawString == null || rawString.isEmpty) {
       return {};
     }
 
     try {
+      final jsonString = await CryptoService.decrypt(rawString);
+      if (jsonString.isEmpty) return {};
+      if (!CryptoService.isEncrypted(rawString)) {
+        await prefs.setString(_storageKey, await CryptoService.encrypt(jsonString));
+      }
       final Map<String, dynamic> rawMap = json.decode(jsonString);
       final Map<String, DayCompletion> result = {};
       rawMap.forEach((key, value) {
@@ -52,7 +58,8 @@ class StreakService {
     data.forEach((key, value) {
       rawMap[key] = value.toJson();
     });
-    await prefs.setString(_storageKey, json.encode(rawMap));
+    final encrypted = await CryptoService.encrypt(json.encode(rawMap));
+    await prefs.setString(_storageKey, encrypted);
   }
 
   static Future<int> getSavedBestStreak() async {

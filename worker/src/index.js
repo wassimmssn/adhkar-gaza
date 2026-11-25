@@ -23,9 +23,114 @@ function corsHeaders(origin, allowedOrigin) {
   return {
     'Access-Control-Allow-Origin': allowed ? origin : allowedOrigin,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Admin-Secret',
     'Access-Control-Max-Age': '86400',
   };
+}
+
+// ── AES-256-GCM KV Encryption Helpers ───────────────────────────────────────
+
+const ENC_PREFIX = 'enc:v1:';
+const GOOGLE_CLIENT_ID = '712885191318-46e55srndlla0f7eo7qb761p1kfhhnub.apps.googleusercontent.com';
+
+function bytesToBase64(bytes) {
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+function base64ToBytes(b64) {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+async function getKvCryptoKey(env) {
+  if (!env.DATA_ENCRYPTION_KEY) return null;
+  const rawBytes = base64ToBytes(env.DATA_ENCRYPTION_KEY);
+  return crypto.subtle.importKey('raw', rawBytes, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+}
+
+async function encryptKVData(dataObj, env) {
+  const jsonStr = JSON.stringify(dataObj);
+  const key = await getKvCryptoKey(env);
+  if (!key) return jsonStr;
+
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const encoded = new TextEncoder().encode(jsonStr);
+  const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+  return `${ENC_PREFIX}${bytesToBase64(iv)}:${bytesToBase64(new Uint8Array(cipherBuf))}`;
+}
+
+async function decryptKVData(rawStr, env) {
+  if (!rawStr) return null;
+  if (!rawStr.startsWith(ENC_PREFIX)) {
+    return { data: JSON.parse(rawStr), isLegacyPlaintext: true };
+  }
+  const key = await getKvCryptoKey(env);
+  if (!key) throw new Error('DATA_ENCRYPTION_KEY secret is not configured');
+
+  const parts = rawStr.slice(ENC_PREFIX.length).split(':');
+  if (parts.length !== 2) throw new Error('Malformed encrypted KV payload');
+  const iv = base64ToBytes(parts[0]);
+  const cipherBytes = base64ToBytes(parts[1]);
+  const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipherBytes);
+  const jsonStr = new TextDecoder().decode(plainBuf);
+  return { data: JSON.parse(jsonStr), isLegacyPlaintext: false };
+}
+
+// ── Authentication Helpers ──────────────────────────────────────────────────
+
+async function verifyGoogleAuth(request, expectedEmail) {
+  const authHeader = request.headers.get('Authorization') || '';
+  if (!authHeader.startsWith('Bearer ')) {
+    return { ok: false, status: 401, error: 'Missing Authorization Bearer token' };
+  }
+  const token = authHeader.slice(7).trim();
+  if (!token) {
+    return { ok: false, status: 401, error: 'Empty Bearer token' };
+  }
+
+  try {
+    let tokenEmail = '';
+    if (token.split('.').length === 3) {
+      // Google ID Token (JWT)
+      const res = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(token)}`);
+      if (!res.ok) return { ok: false, status: 401, error: 'Invalid Google ID token' };
+      const info = await res.json();
+      if (info.aud && info.aud !== GOOGLE_CLIENT_ID) {
+        return { ok: false, status: 403, error: 'Token audience mismatch' };
+      }
+      tokenEmail = (info.email || '').toLowerCase().trim();
+    } else {
+      // Google OAuth2 Access Token
+      const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return { ok: false, status: 401, error: 'Invalid or expired Google access token' };
+      const info = await res.json();
+      tokenEmail = (info.email || '').toLowerCase().trim();
+    }
+
+    if (!tokenEmail || tokenEmail !== expectedEmail.toLowerCase().trim()) {
+      return { ok: false, status: 403, error: 'Email mismatch with authenticated Google account' };
+    }
+    return { ok: true, email: tokenEmail };
+  } catch (err) {
+    console.error('Google token verification error:', err);
+    return { ok: false, status: 401, error: 'Token verification failed' };
+  }
+}
+
+function isAdminAuthorized(request, env) {
+  if (!env.ADMIN_SECRET) return false;
+  const provided = request.headers.get('X-Admin-Secret') || '';
+  return provided.length > 0 && provided === env.ADMIN_SECRET;
 }
 
 function jsonResponse(data, status, origin, allowedOrigin) {
@@ -141,7 +246,7 @@ async function handleSubscribe(request, env, origin) {
       updatedAt: new Date().toISOString(),
     };
 
-    await env.PUSH_SUBSCRIPTIONS.put(key, JSON.stringify(data));
+    await env.PUSH_SUBSCRIPTIONS.put(key, await encryptKVData(data, env));
     return jsonResponse({ success: true }, 200, origin, env.ALLOWED_ORIGIN);
   } catch (err) {
     console.error('Subscribe error:', err);
@@ -218,7 +323,12 @@ async function handleScheduled(env, simulatedNow = null) {
       const raw = await env.PUSH_SUBSCRIPTIONS.get(kvKey.name);
       if (!raw) continue;
 
-      const sub = JSON.parse(raw);
+      const decrypted = await decryptKVData(raw, env);
+      if (!decrypted || !decrypted.data) continue;
+      const sub = decrypted.data;
+      if (decrypted.isLegacyPlaintext && env.DATA_ENCRYPTION_KEY) {
+        await env.PUSH_SUBSCRIPTIONS.put(kvKey.name, await encryptKVData(sub, env));
+      }
       const prefs = sub.preferences;
 
       if (!prefs) continue;
@@ -318,14 +428,19 @@ export default {
         const { email, profile, settings, streakData } = body;
         if (!email) return jsonResponse({ error: 'Email required' }, 400, origin, env.ALLOWED_ORIGIN);
 
-        const userKey = `user:${email.toLowerCase().trim()}`;
+        const authCheck = await verifyGoogleAuth(request, email);
+        if (!authCheck.ok) {
+          return jsonResponse({ error: authCheck.error }, authCheck.status, origin, env.ALLOWED_ORIGIN);
+        }
+
+        const userKey = `user:${authCheck.email}`;
         const userData = {
           profile,
           settings,
           streakData,
           updatedAt: new Date().toISOString(),
         };
-        await env.PUSH_SUBSCRIPTIONS.put(userKey, JSON.stringify(userData));
+        await env.PUSH_SUBSCRIPTIONS.put(userKey, await encryptKVData(userData, env));
         return jsonResponse({ success: true, updatedAt: userData.updatedAt }, 200, origin, env.ALLOWED_ORIGIN);
       } catch (err) {
         return jsonResponse({ error: err.message }, 500, origin, env.ALLOWED_ORIGIN);
@@ -336,12 +451,21 @@ export default {
         const email = url.searchParams.get('email');
         if (!email) return jsonResponse({ error: 'Email required' }, 400, origin, env.ALLOWED_ORIGIN);
 
-        const userKey = `user:${email.toLowerCase().trim()}`;
+        const authCheck = await verifyGoogleAuth(request, email);
+        if (!authCheck.ok) {
+          return jsonResponse({ error: authCheck.error }, authCheck.status, origin, env.ALLOWED_ORIGIN);
+        }
+
+        const userKey = `user:${authCheck.email}`;
         const raw = await env.PUSH_SUBSCRIPTIONS.get(userKey);
         if (!raw) {
           return jsonResponse({ exists: false }, 200, origin, env.ALLOWED_ORIGIN);
         }
-        return jsonResponse({ exists: true, data: JSON.parse(raw) }, 200, origin, env.ALLOWED_ORIGIN);
+        const decrypted = await decryptKVData(raw, env);
+        if (decrypted.isLegacyPlaintext && env.DATA_ENCRYPTION_KEY) {
+          await env.PUSH_SUBSCRIPTIONS.put(userKey, await encryptKVData(decrypted.data, env));
+        }
+        return jsonResponse({ exists: true, data: decrypted.data }, 200, origin, env.ALLOWED_ORIGIN);
       } catch (err) {
         return jsonResponse({ error: err.message }, 500, origin, env.ALLOWED_ORIGIN);
       }
@@ -359,12 +483,16 @@ export default {
       return handleTestPush(request, env, origin);
     }
     if (path === '/api/dump-subs' && request.method === 'GET') {
+      if (!isAdminAuthorized(request, env)) {
+        return jsonResponse({ error: 'Unauthorized' }, 401, origin, env.ALLOWED_ORIGIN);
+      }
       try {
         const listResult = await env.PUSH_SUBSCRIPTIONS.list({ prefix: 'sub:' });
         const subs = [];
         for (const kvKey of listResult.keys) {
           const raw = await env.PUSH_SUBSCRIPTIONS.get(kvKey.name);
-          subs.push({ name: kvKey.name, data: JSON.parse(raw) });
+          const decrypted = await decryptKVData(raw, env);
+          subs.push({ name: kvKey.name, data: decrypted ? decrypted.data : null });
         }
         return jsonResponse({ subs }, 200, origin, env.ALLOWED_ORIGIN);
       } catch (err) {
@@ -372,6 +500,9 @@ export default {
       }
     }
     if (path === '/api/test-cron' && request.method === 'GET') {
+      if (!isAdminAuthorized(request, env)) {
+        return jsonResponse({ error: 'Unauthorized' }, 401, origin, env.ALLOWED_ORIGIN);
+      }
       try {
         const urlObj = new URL(request.url);
         const timeParam = urlObj.searchParams.get('time');

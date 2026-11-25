@@ -38,6 +38,82 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 
   <script>
+    // ── Client-Side AES-256-GCM Storage Encryption (Web Crypto API) ───────
+    (function() {
+      const ENC_PREFIX = 'enc:v1:';
+      const DEVICE_KEY_STORAGE = '_ag_dk_v1';
+      let cachedAesKey = null;
+
+      function bytesToBase64(bytes) {
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+      }
+
+      function base64ToBytes(b64) {
+        const binary = atob(b64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        return bytes;
+      }
+
+      async function getDerivedKey() {
+        if (cachedAesKey) return cachedAesKey;
+        let secretB64 = localStorage.getItem(DEVICE_KEY_STORAGE);
+        if (!secretB64) {
+          const rand = crypto.getRandomValues(new Uint8Array(32));
+          secretB64 = bytesToBase64(rand);
+          localStorage.setItem(DEVICE_KEY_STORAGE, secretB64);
+        }
+        const keyMaterial = await crypto.subtle.importKey(
+          'raw',
+          base64ToBytes(secretB64),
+          'PBKDF2',
+          false,
+          ['deriveKey']
+        );
+        const salt = new TextEncoder().encode(window.location.origin + ':adhkar-gaza-v1');
+        cachedAesKey = await crypto.subtle.deriveKey(
+          {
+            name: 'PBKDF2',
+            salt: salt,
+            iterations: 100000,
+            hash: 'SHA-256'
+          },
+          keyMaterial,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['encrypt', 'decrypt']
+        );
+        return cachedAesKey;
+      }
+
+      window.adhkarCryptoEncrypt = async function(plaintext) {
+        if (!plaintext || !window.crypto || !window.crypto.subtle) return plaintext;
+        const key = await getDerivedKey();
+        const iv = crypto.getRandomValues(new Uint8Array(12));
+        const encoded = new TextEncoder().encode(plaintext);
+        const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, encoded);
+        return ENC_PREFIX + bytesToBase64(iv) + ':' + bytesToBase64(new Uint8Array(cipherBuf));
+      };
+
+      window.adhkarCryptoDecrypt = async function(payload) {
+        if (!payload || typeof payload !== 'string' || !payload.startsWith(ENC_PREFIX)) return payload || '';
+        if (!window.crypto || !window.crypto.subtle) return '';
+        const parts = payload.slice(ENC_PREFIX.length).split(':');
+        if (parts.length !== 2) return '';
+        const iv = base64ToBytes(parts[0]);
+        const cipherBytes = base64ToBytes(parts[1]);
+        const key = await getDerivedKey();
+        const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: iv }, key, cipherBytes);
+        return new TextDecoder().decode(plainBuf);
+      };
+    })();
+
     // ── Google Sign-In Popup & GIS Listener ───────────────────────────────
     const GOOGLE_CLIENT_ID = '712885191318-46e55srndlla0f7eo7qb761p1kfhhnub.apps.googleusercontent.com';
 
@@ -63,7 +139,8 @@
         type: 'GOOGLE_SIGN_IN_SUCCESS',
         displayName: profile.name || profile.given_name || 'Utilisateur Google',
         email: profile.email,
-        photoUrl: profile.picture || ''
+        photoUrl: profile.picture || '',
+        accessToken: response.credential
       };
 
       try {
@@ -102,7 +179,8 @@
                   type: 'GOOGLE_SIGN_IN_SUCCESS',
                   displayName: profile.name || profile.given_name || 'Utilisateur Google',
                   email: profile.email,
-                  photoUrl: profile.picture || ''
+                  photoUrl: profile.picture || '',
+                  accessToken: tokenResponse.access_token
                 };
                 try {
                   localStorage.setItem('auth_google_pending_login', JSON.stringify(authData));

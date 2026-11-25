@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web/web.dart' as web;
 import '../models/user_profile.dart';
+import 'crypto_service.dart';
 
 class AuthService extends ChangeNotifier {
   static final AuthService _instance = AuthService._internal();
@@ -11,12 +12,14 @@ class AuthService extends ChangeNotifier {
   AuthService._internal();
 
   static const String _userKey = 'auth_user_profile_v1';
+  static const String _oauthTokenKey = 'auth_oauth_token_v1';
   static const String _guestAvatarKey = 'guest_avatar_url_v1';
   static const String _lastSyncKey = 'auth_last_sync_v1';
   static const String _syncApiUrl = 'https://adhkar-push.wassimbousmaa.workers.dev/api/user/sync';
   static const String googleClientId = '712885191318-46e55srndlla0f7eo7qb761p1kfhhnub.apps.googleusercontent.com';
 
   UserProfile? _currentUser;
+  String? _accessToken;
   String? _guestAvatar;
   DateTime? _lastSyncTime;
   bool _isLoading = false;
@@ -35,10 +38,24 @@ class AuthService extends ChangeNotifier {
     try {
       final prefs = await SharedPreferences.getInstance();
       _guestAvatar = prefs.getString(_guestAvatarKey);
-      final userJson = prefs.getString(_userKey);
-      if (userJson != null && userJson.isNotEmpty) {
-        final Map<String, dynamic> data = jsonDecode(userJson);
-        _currentUser = UserProfile.fromJson(data);
+      final userRaw = prefs.getString(_userKey);
+      if (userRaw != null && userRaw.isNotEmpty) {
+        final userJson = await CryptoService.decrypt(userRaw);
+        if (userJson.isNotEmpty) {
+          final Map<String, dynamic> data = jsonDecode(userJson);
+          _currentUser = UserProfile.fromJson(data);
+          // Migrate legacy unencrypted data to AES-256-GCM transparently
+          if (!CryptoService.isEncrypted(userRaw)) {
+            await prefs.setString(_userKey, await CryptoService.encrypt(userJson));
+          }
+        }
+      }
+      final tokenRaw = prefs.getString(_oauthTokenKey);
+      if (tokenRaw != null && tokenRaw.isNotEmpty) {
+        final decryptedToken = await CryptoService.decrypt(tokenRaw);
+        if (decryptedToken.isNotEmpty) {
+          _accessToken = decryptedToken;
+        }
       }
       final lastSyncStr = prefs.getString(_lastSyncKey);
       if (lastSyncStr != null) {
@@ -65,7 +82,10 @@ class AuthService extends ChangeNotifier {
           photoUrl: newAvatarUrl,
           createdAt: _currentUser!.createdAt,
         );
-        await prefs.setString(_userKey, jsonEncode(_currentUser!.toJson()));
+        await prefs.setString(
+          _userKey,
+          await CryptoService.encrypt(jsonEncode(_currentUser!.toJson())),
+        );
       } else {
         _guestAvatar = newAvatarUrl;
         await prefs.setString(_guestAvatarKey, newAvatarUrl);
@@ -106,11 +126,13 @@ class AuthService extends ChangeNotifier {
       final email = data['email'] as String? ?? '';
       final name = data['displayName'] as String? ?? '';
       final photo = data['photoUrl'] as String?;
+      final token = data['accessToken'] as String?;
       if (email.isNotEmpty) {
         signInWithGoogle(
           email: email,
           displayName: name.isNotEmpty ? name : email.split('@').first,
           photoUrl: photo,
+          accessToken: token,
         ).then((success) {
           if (success && _currentUser != null && onUserSignedIn != null) {
             onUserSignedIn!(_currentUser!);
@@ -139,6 +161,7 @@ class AuthService extends ChangeNotifier {
     required String email,
     required String displayName,
     String? photoUrl,
+    String? accessToken,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -158,10 +181,22 @@ class AuthService extends ChangeNotifier {
       );
 
       _currentUser = user;
+      if (accessToken != null && accessToken.isNotEmpty) {
+        _accessToken = accessToken;
+      }
       _lastSyncTime = DateTime.now();
 
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_userKey, jsonEncode(user.toJson()));
+      await prefs.setString(
+        _userKey,
+        await CryptoService.encrypt(jsonEncode(user.toJson())),
+      );
+      if (_accessToken != null && _accessToken!.isNotEmpty) {
+        await prefs.setString(
+          _oauthTokenKey,
+          await CryptoService.encrypt(_accessToken!),
+        );
+      }
       await prefs.setString(_lastSyncKey, _lastSyncTime!.toIso8601String());
 
       _isLoading = false;
@@ -178,9 +213,11 @@ class AuthService extends ChangeNotifier {
   /// Sign Out
   Future<void> signOut() async {
     _currentUser = null;
+    _accessToken = null;
     _lastSyncTime = null;
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_userKey);
+    await prefs.remove(_oauthTokenKey);
     await prefs.remove(_lastSyncKey);
     notifyListeners();
   }
@@ -206,6 +243,9 @@ class AuthService extends ChangeNotifier {
       if (kIsWeb) {
         final headers = web.Headers();
         headers.set('Content-Type', 'application/json');
+        if (_accessToken != null && _accessToken!.isNotEmpty) {
+          headers.set('Authorization', 'Bearer $_accessToken');
+        }
 
         final reqInit = web.RequestInit(
           method: 'POST',
@@ -213,7 +253,13 @@ class AuthService extends ChangeNotifier {
           body: jsonEncode(payload).toJS,
         );
 
-        await web.window.fetch(_syncApiUrl.toJS, reqInit).toDart;
+        final resp = await web.window.fetch(_syncApiUrl.toJS, reqInit).toDart;
+        if (!resp.ok) {
+          debugPrint('Cloud sync rejected with HTTP ${resp.status}');
+          _isSyncing = false;
+          notifyListeners();
+          return false;
+        }
       }
 
       _lastSyncTime = DateTime.now();
@@ -238,7 +284,19 @@ class AuthService extends ChangeNotifier {
     try {
       if (kIsWeb) {
         final url = '$_syncApiUrl?email=${Uri.encodeComponent(_currentUser!.email)}';
-        final resp = await web.window.fetch(url.toJS).toDart;
+        final headers = web.Headers();
+        if (_accessToken != null && _accessToken!.isNotEmpty) {
+          headers.set('Authorization', 'Bearer $_accessToken');
+        }
+        final reqInit = web.RequestInit(
+          method: 'GET',
+          headers: headers,
+        );
+        final resp = await web.window.fetch(url.toJS, reqInit).toDart;
+        if (!resp.ok) {
+          debugPrint('Cloud fetch rejected with HTTP ${resp.status}');
+          return null;
+        }
         final jsonText = (await resp.text().toDart).toDart;
         final Map<String, dynamic> res = jsonDecode(jsonText);
         if (res['exists'] == true && res['data'] != null) {
