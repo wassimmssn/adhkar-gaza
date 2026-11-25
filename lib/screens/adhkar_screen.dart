@@ -1096,6 +1096,66 @@ class _CompletionViewState extends State<_CompletionView>
                         ),
                       ),
 
+                      // ── Visual Streak Pill (Issue #4) ──
+                      Builder(
+                        builder: (context) {
+                          final streak = Provider.of<StreakProvider>(context).currentStreak;
+                          if (streak <= 0) return const SizedBox.shrink();
+                          final streakLabel = lang == 'fr' && streak == 1
+                              ? 'jour consécutif'
+                              : AppStrings.get('streak_active_days', lang);
+                          return Padding(
+                            padding: const EdgeInsets.only(top: 14),
+                            child: TweenAnimationBuilder<double>(
+                              tween: Tween(begin: 0.85, end: 1.0),
+                              duration: const Duration(milliseconds: 700),
+                              curve: Curves.elasticOut,
+                              builder: (context, scale, child) {
+                                return Transform.scale(scale: scale, child: child);
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      const Color(0xFFF59E0B).withValues(alpha: isDark ? 0.22 : 0.14),
+                                      const Color(0xFFEA580C).withValues(alpha: isDark ? 0.14 : 0.08),
+                                    ],
+                                  ),
+                                  borderRadius: BorderRadius.circular(24),
+                                  border: Border.all(
+                                    color: const Color(0xFFF59E0B).withValues(alpha: 0.4),
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.local_fire_department_rounded,
+                                      color: Color(0xFFF59E0B),
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      '$streak $streakLabel',
+                                      style: TextStyle(
+                                        fontFamily: 'Cairo',
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w800,
+                                        color: isDark
+                                            ? const Color(0xFFFCD34D)
+                                            : const Color(0xFFB45309),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+
                       const SizedBox(height: 36),
 
                       // ══════════════════════════════════
