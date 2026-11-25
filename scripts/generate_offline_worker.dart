@@ -45,10 +45,12 @@ void main() async {
           .replaceFirst(buildDir.path, '')
           .replaceAll(r'\', '/');
 
-      // Skip the service worker itself, maps, config files, and hidden files
+      // Skip the service worker itself, maps, config files, SEO files, and hidden files
       if (relativePath.endsWith('/flutter_service_worker.js') ||
           relativePath.endsWith('.map') ||
           relativePath.endsWith('_headers') ||
+          relativePath.endsWith('/robots.txt') ||
+          relativePath.endsWith('/sitemap.xml') ||
           relativePath.split('/').last.startsWith('.')) {
         continue;
       }
