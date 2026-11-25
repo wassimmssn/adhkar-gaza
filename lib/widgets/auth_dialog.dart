@@ -118,8 +118,13 @@ Future<void> showGoogleSignInDialog(BuildContext context) async {
         settingsProvider.loadFromJson(Map<String, dynamic>.from(cloudData['settings']));
       }
       if (cloudData['streakData'] != null) {
-        await streakProvider.loadFromJson(Map<String, dynamic>.from(cloudData['streakData']));
+        await streakProvider.mergeFromJson(Map<String, dynamic>.from(cloudData['streakData']));
       }
+      // Push merged state back so cloud also reflects any local offline progress
+      await authService.syncToCloud(
+        settingsData: settingsProvider.toJson(),
+        streakData: streakProvider.toJson(),
+      );
     } else {
       await authService.syncToCloud(
         settingsData: settingsProvider.toJson(),

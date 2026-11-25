@@ -92,6 +92,58 @@ class StreakProvider extends ChangeNotifier {
     };
   }
 
+  /// Merges cloud streak data with local data (union of completed sessions, max counts)
+  Future<void> mergeFromJson(Map<String, dynamic> json) async {
+    bool changed = false;
+    if (json['data'] != null && json['data'] is Map) {
+      final rawData = json['data'] as Map;
+      rawData.forEach((k, v) {
+        if (v is Map) {
+          final key = k.toString();
+          final cloudDay = DayCompletion.fromJson(Map<String, dynamic>.from(v));
+          final localDay = _data[key];
+          if (localDay == null) {
+            _data[key] = cloudDay;
+            changed = true;
+          } else {
+            final mergedPrayers = {...localDay.prayers, ...cloudDay.prayers}.toList();
+            final mergedMorning = localDay.morning || cloudDay.morning;
+            final mergedEvening = localDay.evening || cloudDay.evening;
+            final mergedCount = cloudDay.totalDhikrCount > localDay.totalDhikrCount
+                ? cloudDay.totalDhikrCount
+                : localDay.totalDhikrCount;
+            if (mergedMorning != localDay.morning ||
+                mergedEvening != localDay.evening ||
+                mergedPrayers.length != localDay.prayers.length ||
+                mergedCount != localDay.totalDhikrCount) {
+              localDay.morning = mergedMorning;
+              localDay.evening = mergedEvening;
+              localDay.prayers = mergedPrayers;
+              localDay.totalDhikrCount = mergedCount;
+              changed = true;
+            }
+          }
+        }
+      });
+    }
+
+    final cloudBest = json['bestStreak'] as int? ?? 0;
+    if (cloudBest > _bestStreak) {
+      _bestStreak = cloudBest;
+      changed = true;
+    }
+
+    if (changed) {
+      await StreakService.saveAllData(_data);
+    }
+
+    _currentStreak = StreakService.calculateCurrentStreak(_data, DateTime.now());
+    _bestStreak = StreakService.calculateBestStreak(_data, _bestStreak);
+    await StreakService.saveBestStreak(_bestStreak);
+    _totalSessions = StreakService.calculateTotalCompletedSessions(_data);
+    notifyListeners();
+  }
+
   Future<void> loadFromJson(Map<String, dynamic> json) async {
     if (json['data'] != null && json['data'] is Map) {
       final rawData = json['data'] as Map;

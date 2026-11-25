@@ -7,6 +7,7 @@ import '../providers/settings_provider.dart';
 import '../providers/streak_provider.dart';
 import '../models/dhikr.dart';
 import '../services/audio_service.dart';
+import '../services/auth_service.dart';
 import '../l10n/app_strings.dart';
 import '../widgets/glass_widgets.dart';
 
@@ -954,15 +955,25 @@ class _CompletionViewState extends State<_CompletionView>
       if (mounted) _confettiController.forward();
     });
 
-    // Record streak & commitment completion
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    // Record streak & commitment completion + auto-sync to cloud
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (mounted) {
         final streakProvider =
             Provider.of<StreakProvider>(context, listen: false);
-        streakProvider.recordCompletion(
+        final settingsProvider =
+            Provider.of<SettingsProvider>(context, listen: false);
+        final authService =
+            Provider.of<AuthService>(context, listen: false);
+        await streakProvider.recordCompletion(
           widget.provider.currentCategory,
           dhikrsCount: widget.provider.totalCount,
         );
+        if (authService.isLoggedIn) {
+          await authService.syncToCloud(
+            settingsData: settingsProvider.toJson(),
+            streakData: streakProvider.toJson(),
+          );
+        }
       }
     });
 
